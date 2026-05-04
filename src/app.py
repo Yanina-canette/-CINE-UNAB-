@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 # Simulación de una base de datos de socios del cine
 usuarios = []
@@ -25,6 +25,6 @@ def login():
     return render_template('login.html')
 
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     # Esto enciende el servidor web
     app.run(debug=True)
