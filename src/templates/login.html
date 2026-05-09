@@ -1,1 +1,11 @@
-<h1> aqui va el logo</h1>
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Aquí capturamos lo que el usuario escribe en el cine
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        # Por ahora, cualquier login nos lleva al inicio
+        return redirect(url_for('inicio'))
+
+    return render_template('login.html')

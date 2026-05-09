@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+app = Flask(__name__, template_folder="templates",
+            static_folder="static")
 
 # Simulación de una base de datos de socios del cine
 usuarios = []
@@ -12,17 +13,14 @@ def inicio():
     return render_template('inicio.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        # Aquí capturamos lo que el usuario escribe en el cine
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        # Por ahora, cualquier login nos lleva al inicio
-        return redirect(url_for('inicio'))
-
+@app.route('/login')
+def registro():
     return render_template('login.html')
+
+
+@app.route('/formulario')
+def formulario():
+    return render_template('formulario.html')
 
 
 if __name__ == '__main__':
