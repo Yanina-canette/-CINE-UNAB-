@@ -1,2 +1,33 @@
-from flask import Flask, resquest,render_template,redirect,url_for
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h2>Iniciar sesión</h2>
+
+        <form action="/login" method="POST">
+
+            <input type="email" name="email" placeholder="Email" required>
+
+            <input type="password" name="contraseña" placeholder="Contraseña" required>
+
+            <button type="submit">Ingresar</button>
+
+        </form>
+
+        <p>
+            ¿No tienes cuenta?
+            <a href="/formulario">Regístrate</a>
+        </p>
+
+    </div>
+
+</body>
+</html>
 

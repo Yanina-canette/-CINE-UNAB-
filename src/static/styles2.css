@@ -1,0 +1,114 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Popping', sans-serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    padding: 20 px;
+    background: linear-gradient(130deg,rgb(120, 110, 179),rgb(95, 221, 200),rgb(200, 94, 202));
+}
+
+.login-container{
+    max-width: 450px;
+    width: 100%;
+    padding: 40px;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-align: center;
+
+}
+
+h2{
+    font-size: 2rem;
+    margin-bottom: 30px;
+    font-weight: 600;
+    color: #333;
+
+}
+
+
+input{
+    display: block;
+    height: 45px;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 0 10px;
+    font-size: 1.2rem ;
+    border: 1px solid #ccc;
+    border-radius: 8px ;
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+
+.input:focus{
+    border-color: #717d60;
+    box-shadow: 0 0 8px rbga(113, 125, 96, 0.3);
+}
+
+button{
+    display: block;
+    width: 95%;
+    height: 50px;
+    background: #717d60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size:  1.2rem; ;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+    margin-left: 7px;
+}
+
+button:hover{
+    background: linear-gradient(130deg, skyblue, rgb(49, 49, 120));
+}
+
+p{
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #666;
+}
+
+a{
+    color: #717d60;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+
+/*. al principio ocultamos todos los mensajes de eror */
+small{
+    display: none;
+}
+
+/*. cuando el formulario se intente enviar, si el input esta mal,mostramos el msj rojo*/
+.was-validated input:invalid ~ small{
+    display: block;
+    color: red;
+}
+
+
+@media(max-width:584px){
+    .login-container{
+        width: 95%;
+        padding: 25px;
+    }
+
+  h2{
+    font-size: 1.6rem;
+}
+}

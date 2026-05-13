@@ -22,9 +22,14 @@ body {
 
 }
 
-.container-tittle{
+.tittle{
     font-size: 25px;
     font-weight: 500;
+    text-align: left;
+    padding-left: 140px;
+    width: 100%;
+    margin-bottom: 20px;
+    display: block;
 
 }
 
@@ -45,17 +50,19 @@ form .form-group{
 form span{
     display: block;
     font-weight: 500;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
 
 }
 
-.form-group input{
+.form-group input,
+.form-group select{
     height: 40px;
     width: 100%;
     outline: none;
     border-radius: 5px;
-    border: 1px, solid, #ccc;
-    padding-left: 15 px;
+    border: 1px solid #ccc;
+    padding-left: 15px;
     border-bottom-width: 2px ;
     transition: all 0.3s ease;
 }
@@ -67,9 +74,10 @@ form span{
 }
 
 form .button{
-    width: 100%;
+    width: 95%;
     height: 40px;
-    margin: 40px 0;
+    margin: 12px auto;
+    display: block;
     
 }
 
@@ -108,7 +116,7 @@ small{
     .container{
         max-width: 100%;
     }
-    form. .form-group{
+    form.form-group{
         margin-bottom: 15px;
         width: 100%;
     }
@@ -125,3 +133,4 @@ small{
 
 
 }   
+
