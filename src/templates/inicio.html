@@ -1,1 +1,55 @@
-<h1>Bienvenido {{usuario}}</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles3.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Inicio </title>  
+
+</head>
+
+<body>
+    <header>
+        <a href="#" class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png')}}" alt="logo del cine">
+            <h2 class="cine unab"></h2>
+        </a>
+
+        <nav>
+            <a href="" class="nav-link">Peliculas</a>
+            <a href="" class="nav-link">Precio entradas</a>
+        
+        </nav>
+        <div class="usuario-header">
+            {% if usuario %}
+                <span>Hola, {{ usuario }}</span>
+                <a href="/logout" class="btn-logout">Cerrar sesión</a>
+            {% else %}
+            <a href="/login" class="btn-login">
+                <i class="fa-regular fa-user"></i>
+            </a>
+            {% endif %}
+        </div>
+
+    </header>
+
+    <div class="resolucion">
+       <div class="desktop">
+            <h1></h1>
+        </div>
+    
+        <div class="tablet">
+            <h1></h1>
+        </div>
+    
+        <div class="celular">
+            <h1></h1>
+        </div>
+    
+    </div>
+</body>
+
+</html>

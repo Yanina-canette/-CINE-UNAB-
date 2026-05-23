@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
 </head>
 
@@ -10,22 +11,26 @@
     <div class="login-container">
 
         <h2>Iniciar sesión</h2>
+        <div class="login-inner">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for mensaje in messages %}
+                    <p style="color:red; margin-bottom:10px;">{{ mensaje }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form action="/login" method="POST">
-
-            <input type="email" name="email" placeholder="Email" required>
-
-            <input type="password" name="contraseña" placeholder="Contraseña" required>
-
-            <button type="submit">Ingresar</button>
-
+            <label for="email">Correo</label>
+            <input type="email" name="email" placeholder="" required>
+            <label for="contraseña">Contraseña</label>
+            <input type="password" name="contraseña" placeholder="" required>
+        
+            <a href="/recuperar" class="link-olvide">Olvidé mi contraseña</a>
+            <button type="submit">Iniciar sesión</button>
+            <a href="/formulario" class="btn-crear">Crear cuenta</a>
         </form>
-
-        <p>
-            ¿No tienes cuenta?
-            <a href="/formulario">Regístrate</a>
-        </p>
-
+        </div>
     </div>
 
 </body>

@@ -9,7 +9,7 @@ body {
     height: 100vh;
     justify-content: center;
     align-items: center;
-    padding: 10 px;
+    padding: 10px;
     background: linear-gradient(130deg,green,lightgreen,lightblue,blue);
 }
 
@@ -18,7 +18,7 @@ body {
     width: 100%;
     padding: 25px 30px;
     background-color: #fff;
-    border-radius: 5 px;
+    border-radius: 5px;
 
 }
 
@@ -111,6 +111,11 @@ small{
 
 }
 
+p {
+    color: red;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
 
 @media(max-width:584px){
     .container{
@@ -131,6 +136,16 @@ small{
         margin: 20px 0;
     }
 
+}
 
-}   
+@media(min-width: 584px) and (max-width: 900px){
+    .container{
+        max-width: 90%;
+    }
+    form .form-group{
+        width: calc(100% / 2 - 15px);
+    }
+
+}
+
 

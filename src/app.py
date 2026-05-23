@@ -1,19 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-import mysql.connector
+from mysql.connector import pooling
 from flask import session
+import os
 
 
 
 
 app = Flask(__name__, template_folder="templates",
             static_folder="static")
-app.secret_key = "clave_secreta"
 
-# Simulación de una base de datos de socios del cine
-usuario = []
+app.secret_key = os.environ.get("SECRET_KEY", "fallback_solo_en_dev")
 
-conexion = mysql.connector.connect(
+
+pool = pooling.MySQLConnectionPool(
+    pool_name="cine_pool",
+    pool_size=5,
     host="localhost",
     user="root",
     password="",
@@ -21,25 +23,19 @@ conexion = mysql.connector.connect(
     
 )
 
+def get_conexion():
+    return pool.get_connection()
 
 @app.route('/')
 def inicio():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
-    
-    return render_template('inicio.html',
-    usuario= session['usuario'])
-    
+    usuario = session.get('usuario', None)
+    return render_template('inicio.html', usuario=usuario)
         
-
     
 @app.route('/logout')
 def logout():
     session.pop('usuario',None)
     return redirect(url_for('login'))
-
-
-
 
 @app.route('/formulario', methods=['GET', 'POST'])
 def formulario():
@@ -57,37 +53,40 @@ def formulario():
         if contraseña != confirmar:
             flash("las contraseñas no coinciden")
             return redirect(url_for('formulario'))
+        
+        conexion = get_conexion() 
 
-        cursor = conexion.cursor()
+        try:
+            cursor = conexion.cursor()
 
-        cursor.execute(
+            cursor.execute(
             "SELECT * FROM usuarios WHERE email=%s",
             (email,))
 
-        usuario = cursor.fetchone()
-        cursor.close()
-        if usuario:
-            flash("Email ya existente")
-           
-            return redirect(url_for('formulario'))
+            usuario = cursor.fetchone()
         
-        contraseña_hash = generate_password_hash(contraseña)
+            if usuario:
+                flash("Email ya existente")
+                return redirect(url_for('formulario'))
+        
+            contraseña_hash = generate_password_hash(contraseña)
 
-        sql = """
-        INSERT INTO usuarios(nombre,apellido,telefono,es_estudiante,email,password_hash)
-        VALUES(%s,%s,%s,%s,%s,%s)
-        """
+            sql = """
+            INSERT INTO usuarios(nombre,apellido,telefono,es_estudiante,email,password_hash)
+            VALUES(%s,%s,%s,%s,%s,%s)
+            """
 
-        valores = (nombre, apellido, telefono, es_estudiante, email, contraseña_hash)
+            valores = (nombre, apellido, telefono, es_estudiante, email, contraseña_hash)
 
-        cursor.execute(sql, valores)
-
-        conexion.commit()
-        cursor.close()
-
-        flash("Usuario registrado correctamente")
-
-        return redirect(url_for('login'))
+            cursor.execute(sql, valores)
+            conexion.commit()
+    
+            flash("Usuario registrado correctamente")
+            return redirect(url_for('login'))
+        
+        finally:
+            cursor.close()   
+            conexion.close()
 
     return render_template('formulario.html')
 
@@ -98,33 +97,77 @@ def login():
         email= request.form ['email']
         contraseña= request.form ['contraseña']
 
-        cursor = conexion.cursor()
+        conexion = get_conexion()  
+        try:
 
-        cursor.execute(
+            cursor = conexion.cursor()
+
+            cursor.execute(
             "SELECT nombre, password_hash FROM usuarios WHERE email=%s",
             (email,))
 
-        usuario = cursor.fetchone()
-        cursor.close()
+            usuario = cursor.fetchone()
 
-        if usuario:
+            if usuario:
 
-            nombre_db = usuario[0]
-            hash_db = usuario[1]
+                nombre_db = usuario[0]
+                hash_db = usuario[1]
 
-            if check_password_hash(hash_db, contraseña):
-                session ['usuario'] = nombre_db
-                flash(f"Bienvenido {nombre_db}")
-                return redirect(url_for('inicio'))
+                if check_password_hash(hash_db, contraseña):
+                    session ['usuario'] = nombre_db
+                    flash(f"Bienvenido {nombre_db}")
+                    return redirect(url_for('inicio'))
+                else:
+                    flash("Contraseña incorrecta")
+                    return redirect(url_for('login'))
+
             else:
-                flash("Contraseña incorrecta")
+                flash("Email no registrado")
                 return redirect(url_for('login'))
+            
+        finally:
+            cursor.close()      
+            conexion.close() 
+        
+    return render_template('login.html')
 
-        else:
-            flash("Email no registrado")
+@app.route('/recuperar', methods=['GET', 'POST'])
+def recuperar():
+    if request.method == 'POST':
+        email = request.form['email']
+        nueva = request.form['nueva']
+        confirmar = request.form['confirmar']
+
+        if nueva != confirmar:
+            flash("Las contraseñas no coinciden")
+            return redirect(url_for('recuperar'))
+
+        conexion = get_conexion()
+        try:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
+            usuario = cursor.fetchone()
+
+            if not usuario:
+                flash("Email no registrado")
+                return redirect(url_for('recuperar'))
+
+            nueva_hash = generate_password_hash(nueva)
+            cursor.execute(
+                "UPDATE usuarios SET password_hash=%s WHERE email=%s",
+                (nueva_hash, email)
+            )
+            conexion.commit()
+            flash("Contraseña actualizada correctamente")
             return redirect(url_for('login'))
 
-    return render_template('login.html')
+        finally:
+            cursor.close()
+            conexion.close()
+
+    return render_template('recuperar.html')
+
+
 
 
 if __name__ == '__main__':

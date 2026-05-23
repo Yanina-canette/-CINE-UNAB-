@@ -73,16 +73,25 @@
     <script>
         const addForm = document.getElementById("form-validation");
         addForm.addEventListener("submit", (e) => {
+
+            const pass = document.querySelector('input[name="contraseña"]').value;
+            const confirmar = document.querySelector('input[name="confirmar"]').value;
+        
+            if (pass !== confirmar) {
+                e.preventDefault();
+                alert("Las contraseñas no coinciden");
+                return;
+            }
+
             if(addForm.checkValidity() === false ) {
                 e.preventDefault();
                 e.stopPropagation();
             }
-                addForm.classList.add('was-validated');
+            
+            addForm.classList.add('was-validated');
             
         });
     </script>
-
-    </div>
 
 </body>
 
