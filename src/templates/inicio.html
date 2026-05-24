@@ -1,55 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine UNAB - Cartelera</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles3.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>Inicio </title>  
-
 </head>
+<body style="background-color: #141414; margin: 0; font-family: Arial, sans-serif;">
 
-<body>
-    <header>
-        <a href="#" class="logo">
-            <img src="{{ url_for('static', filename='img/logo.png')}}" alt="logo del cine">
-            <h2 class="cine unab"></h2>
-        </a>
-
-        <nav>
-            <a href="" class="nav-link">Peliculas</a>
-            <a href="" class="nav-link">Precio entradas</a>
-        
-        </nav>
-        <div class="usuario-header">
-            {% if usuario %}
-                <span>Hola, {{ usuario }}</span>
-                <a href="/logout" class="btn-logout">Cerrar sesión</a>
-            {% else %}
-            <a href="/login" class="btn-login">
-                <i class="fa-regular fa-user"></i>
-            </a>
-            {% endif %}
+    <header style="background-color: #0076a3; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo UNAB" style="height: 50px;">
         </div>
-
+        <nav>
+            <a href="#" style="color: white; margin-left: 20px; text-decoration: none; font-weight: bold; font-size: 1.2rem;">Películas</a>
+            <a href="#" style="color: white; margin-left: 20px; text-decoration: none; font-weight: bold; font-size: 1.2rem;">Precio entradas</a>
+        </nav>
     </header>
 
-    <div class="resolucion">
-       <div class="desktop">
-            <h1></h1>
-        </div>
-    
-        <div class="tablet">
-            <h1></h1>
-        </div>
-    
-        <div class="celular">
-            <h1></h1>
-        </div>
-    
+    <div class="slider-box">
+        <ul>
+            <li>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200&auto=format&fit=crop" alt="Publicidad 1"> 
+            </li>
+            <li>
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1200&auto=format&fit=crop" alt="Publicidad 2"> 
+            </li>
+            <li>
+                <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1200&auto=format&fit=crop" alt="Publicidad 3"> 
+            </li>
+        </ul>
     </div>
-</body>
 
+    <h2 style="color: white; padding-left: 40px; margin-top: 40px; font-size: 2rem;">Películas en Cartelera</h2>
+
+    <main class="contenedor-cartelera">
+        {% for peli in peliculas %}
+        <div class="tarjeta-pelicula">
+            <div class="imagen-contenedor">
+                <img src="{{ peli.poster_url }}" alt="Póster de {{ peli.titulo }}">
+            </div>
+            <div class="info-pelicula">
+                <h3>{{ peli.titulo }}</h3>
+                <p class="sinopsis">{{ peli.sinopsis }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </main>
+
+    <footer style="text-align: center; padding: 20px; background-color: #141414; color: #666; margin-top: 50px;">
+        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+    </footer>
+<script>
+    // Buscamos el carrusel y las flechas en la página
+    const carrusel = document.querySelector('.contenedor-carrusel'); // Cambia esto por la clase real de tu carrusel si es otra
+    const botonSiguiente = document.querySelector('.flecha-derecha'); // Cambia esto por la clase de tu flecha derecha
+    
+    if (botonSiguiente) {
+        // Configuramos para que "haga clic" solo cada 4000 milisegundos (4 segundos)
+        setInterval(() => {
+            botonSiguiente.click();
+        }, 4000);
+    }
+</script>
+</body>
 </html>

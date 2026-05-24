@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from mysql.connector import pooling
@@ -18,7 +19,7 @@ pool = pooling.MySQLConnectionPool(
     pool_size=5,
     host="localhost",
     user="root",
-    password="",
+    password="mysql0610",
     database="cine_database"
     
 )
@@ -167,6 +168,39 @@ def recuperar():
 
     return render_template('recuperar.html')
 
+#   NUEVA RUTA PARA LA API DE PELÍCULAS
+@app.route("/peliculas")
+def peliculas():
+    usuario = session.get("usuario", None)
+    
+   
+    url = "https://api.themoviedb.org/3/movie/now_playing?api_key=9ca3c028ce5b15354d7a635e4a9db833&language=es-ES&region=AR"
+    
+    try:
+        respuesta = requests.get(url, verify=False)
+        datos = respuesta.json()
+        peliculas_api = datos.get("results", [])
+        
+       
+        lista_peliculas = []
+        for peli in peliculas_api[:6]:
+            imagen_hd = f"https://image.tmdb.org/t/p/original{peli.get('poster_path')}" if peli.get('poster_path') else None
+            imagen_normal = f"https://image.tmdb.org/t/p/w500{peli.get('poster_path')}" if peli.get('poster_path') else None
+            
+            # 2. Guardamos ambas en el diccionario
+            lista_peliculas.append({
+                "titulo": peli.get("title"),
+                "descripcion": peli.get("overview"),
+                "imagen_carru": imagen_hd,       # <--- Alta calidad para el carrusel
+                "imagen_tarjeta": imagen_normal  # <--- Calidad normal para las tarjetas
+            })
+            
+    except Exception as e:
+        print(f"Error al conectar con la API de películas: {e}")
+        lista_peliculas = []  
+
+    # 3. Le pasamos las películas procesadas al HTML
+    return render_template("peliculas.html", usuario=usuario, peliculas=lista_peliculas)
 
 
 
