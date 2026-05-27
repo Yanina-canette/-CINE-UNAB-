@@ -1,9 +1,9 @@
-import requests
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from mysql.connector import pooling
 from flask import session
 import os
+import requests
 
 
 
@@ -19,7 +19,7 @@ pool = pooling.MySQLConnectionPool(
     pool_size=5,
     host="localhost",
     user="root",
-    password="mysql0610",
+    password="",
     database="cine_database"
     
 )

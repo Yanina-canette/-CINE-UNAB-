@@ -1,16 +1,47 @@
-class Usuario():
-    def __init__(self,email,contraseña):
-        self.email = email
-        self. contraseña = contraseña
 
-    def iniciar_sesion(self):
-        pass
+
+
+class Usuario():
+    def __init__(self,nombre,email,contraseña):
+        self.__nombre = nombre
+        self.__email = email
+        self. __contraseña = contraseña
+    
+    def get_nombre(self):
+        return self.__nombre
+    
+    def set_nombre(self, nombre):
+        self.__nombre = nombre
+
+    def get_email(self):
+        return self.__email
+    
+    def set_email(self,email):
+        self.__email = email
+
+    def get_contraseña(self):
+        return self.__contraseña
+    
+    def set_contraseña(self, contraseña):
+        self.__contraseña = contraseña
+
+    
+
+    def iniciar_sesion(self,contraseña_ingresada):
+        if check_password_hash(self.__contraseña, contraseña_ingresada):
+            return True
+        return False
 
     def cerrar_sesion(self):
         pass
     
     def actualizar_datos(self):
         pass
+
+
+
+
+
 
 
 class Administrador(Usuario):
