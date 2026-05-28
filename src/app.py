@@ -19,7 +19,7 @@ pool = pooling.MySQLConnectionPool(
     pool_size=5,
     host="localhost",
     user="root",
-    password="",
+    password="mysql0610",
     database="cine_database"
     
 )

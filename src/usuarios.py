@@ -1,6 +1,3 @@
-
-
-
 class Usuario():
     def __init__(self,nombre,email,contraseña):
         self.__nombre = nombre
