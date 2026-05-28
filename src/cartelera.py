@@ -1,37 +1,115 @@
-class Pelicula:
-    def __init__(self):
+
+
+class pelicula:
+    def _init_(self):
         pass
     
 
-class Sala:
-    def __init__(self, numero_sala,cantidad_asientos,tipo_asiento):
-        pass
+class sala:
+    def __init__(self, numero_sala,capacidad, tipo_sala):
+        self.numero_sala = numero_sala
+        self.capacidad = capacidad
+        self.tipo_sala = tipo_sala
+
+        # lista de asientos en la sala
+        self.asientos = []
+
+        for numero in range (1, capacidad + 1):
+
+            asiento = {
+                "numero": numero,
+                "ocupado": False
+            }
+
+            self.asientos.append(asiento)
+
+    def mostrar_asientos(self):
+
+        return self.asientos
+
+    def reservar_asiento(self, numero_asiento):
+
+        for asiento in self.asientos:
+
+            if asiento ["numero"] == numero_asiento:
+                if asiento ["ocupado"] == False:
+
+                    asiento ["ocupado"] = True
+                    return "Asiento reservado" 
+
+                else: return "Asiento ocupado"       
 
 
 class Funcion:
     def __init__(self,fecha,horario,sala,pelicula,precio):
+        self.fecha = fecha
+        self.horario = horario
+        self.sala = sala
+        self.pelicula = pelicula
+        self.precio = precio
+        self.asientos_disponibles = sala.cantidad_asientos
+        self.asientos_ocupados = [] 
+
+    def verificar_disponibilidad(self, asiento):
+        return asiento not in self.asientos_ocupados and asiento <= self.sala.cantidad_asientos
+
+    def reservar_asiento(self, asiento):
+        if self.verificar_disponibilidad(asiento):
+            self.asientos_ocupados.append(asiento)
+            self.asientos_disponibles -= 1
+            return True
+        return False
+
+    def liberar_asiento(self, asiento):
+        if asiento in self.asiento_ocupados:
+            self.asientos_ocupados.remove(asiento)
+            self.asientos_disponibles += 1
+            return True
+        return False
+
+
+    def mostrar_funcion(self):
+
+        print("Película:", self.pelicula)
+        print("Fecha:", self.fecha)
+        print("Horario:", self.horario)
+        print("Sala:", self.sala)
+        print("Precio:", self.precio)
+
+class entrada:
+    def _init_(self,asiento,usuario,funcion,precio_final):
         pass
 
+import datetime
+#Se importa datetime para las fechas.
 
-class Entrada:
-    def __init__(self,asiento,usuario,funcion,precio_final):
-        pass
-
-class Compra:
-    def __init__(self,precio,):
-        pass
-
+class compra:
+    def _init_(self, precio, fecha, funcion, asientos):
+        self.__precio = precio
+        self.__fecha = fecha
+        self.__funcion = funcion
+        self.__asientos = asientos
+        
     def validar_asientos(self):
-       pass
-   
+        asientos_por_fila = 5
+        if self.__asientos == asientos_por_fila:
+            return "El número de asientos es valido."
+        else:
+            return "El número de asientos no es valido."
+        
+        
     def calcular_total(self):
-       pass
-  
-    def generar_compra(self):
-       pass
+        total = float(self_precio * self_asientos)
+        return total
+        
+    def generar_fecha(fecha_compra:str):
+        # En los atributos, se debe pasar la fecha en string de la siguiente manera para convertirla: "27-5-2026 (fecha) 15:00:00 (hora)"
+        fecha_convertida = datetime.strptime(fecha_compra, "%d-%m-%Y %H:%M:%S")
+        return fecha_convertida
 
-class Metodo_pago:
-    def __init__(self,efectivo,tarjeta_deb_,tarjeta_cred,mercado_pago):
+
+class metodo_pago:
+    def _init(self,efectivo,tarjeta_deb,tarjeta_cred,mercado_pago):
         pass
 
     def elegir_pago(self):
@@ -39,6 +117,3 @@ class Metodo_pago:
 
     def aprobar_compra(self):
         pass
-
-
-    
