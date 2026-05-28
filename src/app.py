@@ -187,8 +187,10 @@ def peliculas():
        
         lista_peliculas = []
         for peli in peliculas_api[:6]:
-            imagen_hd = f"https://image.tmdb.org/t/p/original{peli.get('poster_path')}" if peli.get('poster_path') else None
-            imagen_normal = f"https://image.tmdb.org/t/p/w500{peli.get('poster_path')}" if peli.get('poster_path') else None
+            path_backdrop = peli.get('backdrop_path')
+            path_poster = peli.get('poster_path')
+            imagen_hd = f"https://image.tmdb.org/t/p/w1280{path_backdrop}" if path_backdrop else None
+            imagen_normal = f"https://image.tmdb.org/t/p/w500{path_poster}" if path_poster else None
             
             # 2. Guardamos ambas en el diccionario
             lista_peliculas.append({
