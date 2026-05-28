@@ -4,6 +4,9 @@ from mysql.connector import pooling
 from flask import session
 import os
 import requests
+from cartelera import Pelicula,Sala,Funcion,Entrada,Compra,Metodo_pago
+from usuarios import Usuario,Administrador,Cliente
+
 
 
 
@@ -27,12 +30,12 @@ pool = pooling.MySQLConnectionPool(
 def get_conexion():
     return pool.get_connection()
 
-@app.route('/')
+
+@app.route('/') 
 def inicio():
-    usuario = session.get('usuario', None)
-    return render_template('inicio.html', usuario=usuario)
-        
-    
+    return redirect(url_for('peliculas'))
+
+
 @app.route('/logout')
 def logout():
     session.pop('usuario',None)
@@ -168,8 +171,8 @@ def recuperar():
 
     return render_template('recuperar.html')
 
-#   NUEVA RUTA PARA LA API DE PELÍCULAS
-@app.route("/peliculas")
+    
+@app.route('/peliculas')
 def peliculas():
     usuario = session.get("usuario", None)
     
@@ -190,9 +193,9 @@ def peliculas():
             # 2. Guardamos ambas en el diccionario
             lista_peliculas.append({
                 "titulo": peli.get("title"),
-                "descripcion": peli.get("overview"),
+                "sinopsis": peli.get("overview"),
                 "imagen_carru": imagen_hd,       # <--- Alta calidad para el carrusel
-                "imagen_tarjeta": imagen_normal  # <--- Calidad normal para las tarjetas
+                "poster_url": imagen_normal  # <--- Calidad normal para las tarjetas
             })
             
     except Exception as e:
@@ -201,10 +204,10 @@ def peliculas():
 
     # 3. Le pasamos las películas procesadas al HTML
     return render_template("peliculas.html", usuario=usuario, peliculas=lista_peliculas)
+        
 
 
 
 if __name__ == '__main__':
     # Esto enciende el servidor web
     app.run(debug=True)
-

@@ -31,9 +31,6 @@ class Usuario():
 
     def cerrar_sesion(self):
         pass
-    
-    def actualizar_datos(self):
-        pass
 
 
 
@@ -42,8 +39,8 @@ class Usuario():
 
 
 class Administrador(Usuario):
-    def __init__(self, email, contraseña):
-        super().__init__(email, contraseña)
+    def __init__(self,nombre, email, contraseña):
+        super().__init__(nombre,email,contraseña)
 
     def selecionar_peliculas(self):
         pass
@@ -51,7 +48,7 @@ class Administrador(Usuario):
     def destacar_pelicula(self):
         pass
 
-    def modificar_precios(self):
+    def modificar_precios(self,conexion):
         pass
 
     def administrar_salas(self):
@@ -63,8 +60,8 @@ class Administrador(Usuario):
 
 
 class Cliente(Usuario):
-    def __init__(self, email, contraseña):
-        super().__init__(email, contraseña)
+    def __init__(self,nombre, email, contraseña):
+        super().__init__(nombre,email, contraseña)
 
     def comprar_entradas(self):
         pass

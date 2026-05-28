@@ -1,54 +1,44 @@
-class Usuario():
-    def __init__(self,email,contraseña):
-        self.email = email
-        self. contraseña = contraseña
-
-    def iniciar_sesion(self):
-        pass
-
-    def cerrar_sesion(self):
-        pass
-    
-    def actualizar_datos(self):
-        pass
-
-
-class Administrador(Usuario):
-    def __init__(self, email, contraseña):
-        super().__init__(email, contraseña)
-
-    def selecionar_peliculas(self):
-        pass
-
-    def destacar_pelicula(self):
-        pass
-
-    def modificar_precios(self):
-        pass
-
-    def administrar_salas(self):
-        pass
-
-    def gestionar_horarios(self):
+class Pelicula:
+    def __init__(self):
         pass
     
 
-
-class Cliente(Usuario):
-    def __init__(self, email, contraseña):
-        super().__init__(email, contraseña)
-
-    def comprar_entradas(self):
+class Sala:
+    def __init__(self, numero_sala,cantidad_asientos,tipo_asiento):
         pass
 
-    def elegir_funciones(self):
+
+class Funcion:
+    def __init__(self,fecha,horario,sala,pelicula,precio):
         pass
 
-    def seleccionar_asiento(self):
+
+class Entrada:
+    def __init__(self,asiento,usuario,funcion,precio_final):
         pass
 
-    def elegir_metodo_pago(self):
+class Compra:
+    def __init__(self,precio,):
         pass
 
-    def confirmar_compra(self):
+    def validar_asientos(self):
+       pass
+   
+    def calcular_total(self):
+       pass
+  
+    def generar_compra(self):
+       pass
+
+class Metodo_pago:
+    def __init__(self,efectivo,tarjeta_deb_,tarjeta_cred,mercado_pago):
         pass
+
+    def elegir_pago(self):
+        pass
+
+    def aprobar_compra(self):
+        pass
+
+
+    
