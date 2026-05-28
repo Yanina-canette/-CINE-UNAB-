@@ -11,32 +11,50 @@ a{
   
 header {
     display: flex;
-    min-height: 70px;
+    overflow: hidden;
     background: #1f4060;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    border-bottom: 2px solid #7B9669;
+    padding: 0px 10px;
+    border-bottom: 2px solid #7b9669;
+    height: 90px;
+   
 }
-  
+
+header a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
 .logo {
     display: flex;
     align-items: center;
 }
   
 .logo img {
-    height: 100px;        
+    height: 170px;        
     margin-right: 10px;
     mix-blend-mode: screen;  
     filter: brightness(1.2) contrast(1.2);  
     margin-left: 15px;   
     margin-top: 5px;
+    overflow: hidden;
 }
-  
-nav a{
-    font-weight: 600;
-    padding-right: 10px;
-    font-size: 1.3rem;
+nav {
+    display: flex;
+    align-items: center;
+    gap: 30px; 
+    flex: 1;
+    justify-content: center;
+    margin-right: 160px;
+}
+
+nav a {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white;
+    text-decoration: none;
 }
   
 nav a:hover{
@@ -53,6 +71,7 @@ nav a.active {
     align-items: center;
     gap: 15px;
     color: white;
+    margin-right: 20px;
 }
 
 .btn-logout {
@@ -76,6 +95,29 @@ nav a.active {
     padding: 0;
 }
 
+.btn-login {
+    width: 55px;
+    height: 55px;
+    background-color: #dee4e9 ;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; 
+    transition: background-color 0.2s;
+}
+
+.btn-login:hover {
+    background-color:#82cac1; 
+}
+
+.btn-login i {
+    color: #08471f;
+    font-size: 30px;
+}
+
+
 @media (max-width:584px){
     header{
     flex-direction: column;
@@ -96,7 +138,7 @@ nav a.active {
     .desktop{
       display:none;
     }
-    .tablet{
+    .celular{
       display:none;
     }
 }
@@ -121,107 +163,3 @@ nav a.active {
 }
   
 
-/* --- NUESTROS ESTILOS PARA LAS TARJETAS DE PELÍCULAS --- */
-
-/* Contenedor que agrupa las tarjetas */
-.contenedor-cartelera {
-    display: grid;
-    /* Esto crea columnas que se ajustan automáticamente al tamaño de la pantalla */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px; /* Espacio entre cada tarjeta */
-    padding: 20px;
-    width: 90%;
-    margin: 0 auto; /* Centra el contenedor en la pantalla */
-}
-
-/* Estilo de la tarjeta individual */
-.tarjeta-pelicula {
-    background-color: #1a1a1a; /* Fondo oscuro */
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.tarjeta-pelicula:hover {
-    transform: scale(1.03); /* Hace que la peli se mueva un poquito al pasar el mouse */
-}
-
-.imagen-contenedor img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.info-pelicula {
-    padding: 15px;
-}
-
-.info-pelicula h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
-    color: #f5c518; /* Títulos en dorado */
-}
-
-.sinopsis {
-    font-size: 0.9rem;
-    color: #cccccc;
-    line-height: 1.4;
-}
-
-footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 0.8rem;
-    color: #666;
-}
-
-/* --- ESTILOS DEL CARRUSEL DE PUBLICIDAD (ARRIBA) --- */
-
-/* --- ESTILOS GENERALES --- */
-body { font-family: sans-serif; margin: 0; background-color: #081118; }
-
-/* --- CARRUSEL PUBLICIDAD (ARRIBA) --- */
-.slider-box {
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 10px 0;
-}
-.slider-box ul { display: flex; padding: 0; margin: 0; list-style: none; gap: 15px; }
-.slider-box li { flex: 0 0 100%; width: 500px; height: 400px; border-radius: 10px; overflow: hidden; position: relative;}
-.slider-box li img { width: 100%; height: 100%; object-fit: cover; object-position: 73% 27%; }
-
-/* --- GRILLA DE PELÍCULAS (ABAJO) --- */
-.contenedor-cartelera {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 30px;
-    padding: 40px;
-    background-color: #141414;
-}
-
-.tarjeta-pelicula {
-    background-color: #1f1f1f;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s;
-}
-
-.tarjeta-pelicula:hover { transform: scale(1.03); }
-
-/* Ajuste de imagen en la tarjeta */
-.tarjeta-pelicula img {
-    width: 100%;
-    height: 300px; 
-    object-fit: cover;
-    display: block;
-}
-
-.info-pelicula { padding: 15px; }
-.info-pelicula h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #f5c518; }
-.sinopsis { font-size: 0.85rem; color: #cccccc; line-height: 1.4; }
-
-/* --- OTROS --- */
-footer { text-align: center; padding: 20px; font-size: 0.8rem; color: #666; }

@@ -7,41 +7,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>FORMULARIO DE REGISTRO!</title>
 
 </head>
 
 <body>
-    <div class="container">
+    <div class="container">   
         <div class="tittle">REGISTRO DE USUARIO</div>
-        {% with messages=
-        get_flashed_messages() %}
-            {% if messages %}
-                {% for mensaje in messages %}
-                    <p>{{mensaje}}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}    
+            {% with messages= get_flashed_messages() %}
+                {% if messages %}
+                    {% for mensaje in messages %}
+                        <p>{{mensaje}}</p>
+                     {% endfor %}
+                {% endif %}
+            {% endwith %}    
                             
 
-        <form ID="form-validation"  action="/formulario" method= "POST" novalidate>
-            <div class="form-group">
-                <span>nombre</span>
-                <input type="text" name="nombre" placeholder="Ingrese Nombre" required>
-                <small>Por favor ingrese Nombre</small>
-            </div>
-            <div class="form-group">
-                <span>apellido</span>
-                <input type="text" name="apellido" placeholder="Ingrese Apellido" required>
-                <small>Por favor ingrese Apellido</small>
-            </div>
-            <div class="form-group">
-                <span>telefono</span>
-                <input type="number" name="telefono" placeholder="Ingrese Telefono" required>
-                <small>Por favor ingrese Telefono</small>
-            </div>
-            <div class="form-group">
-                <span>¿Es estudiante?</span>
+    <form ID="form-validation"  action="/formulario" method= "POST" novalidate>
+        <div class="form-group">
+            <span>nombre</span>
+            <input type="text" name="nombre" placeholder="Ingrese Nombre" required>
+            <small>Por favor ingrese Nombre</small>
+        </div>
+        <div class="form-group">
+            <span>apellido</span>
+            <input type="text" name="apellido" placeholder="Ingrese Apellido" required>
+            <small>Por favor ingrese Apellido</small>
+        </div>
+        <div class="form-group">
+            <span>telefono</span>
+             <input type="number" name="telefono" placeholder="Ingrese Telefono" required>
+            <small>Por favor ingrese Telefono</small>
+        </div>
+        <div class="form-group">
+            <span>¿Es estudiante?</span>
                 <select name="es_estudiante" required style="height: 40px; width: 100%; border-radius: 5px; border: 1px solid #ccc; padding-left: 10px; outline: none;">
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="si">Sí</option>
