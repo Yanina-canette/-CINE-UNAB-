@@ -1,7 +1,7 @@
-
+from datetime import datetime
 
 class pelicula:
-    def _init_(self):
+    def __init__(self):
         pass
     
 
@@ -47,11 +47,11 @@ class Funcion:
         self.sala = sala
         self.pelicula = pelicula
         self.precio = precio
-        self.asientos_disponibles = sala.cantidad_asientos
+        self.asientos_disponibles = sala.capacidad
         self.asientos_ocupados = [] 
 
     def verificar_disponibilidad(self, asiento):
-        return asiento not in self.asientos_ocupados and asiento <= self.sala.cantidad_asientos
+        return asiento not in self.asientos_ocupados and asiento <= self.sala.capacidad
 
     def reservar_asiento(self, asiento):
         if self.verificar_disponibilidad(asiento):
@@ -61,7 +61,7 @@ class Funcion:
         return False
 
     def liberar_asiento(self, asiento):
-        if asiento in self.asiento_ocupados:
+        if asiento in self.asientos_ocupados:
             self.asientos_ocupados.remove(asiento)
             self.asientos_disponibles += 1
             return True
@@ -77,14 +77,12 @@ class Funcion:
         print("Precio:", self.precio)
 
 class entrada:
-    def _init_(self,asiento,usuario,funcion,precio_final):
+    def __init__(self,asiento,usuario,funcion,precio_final):
         pass
 
-import datetime
-#Se importa datetime para las fechas.
 
 class compra:
-    def _init_(self, precio, fecha, funcion, asientos):
+    def __init__(self, precio, fecha, funcion, asientos):
         self.__precio = precio
         self.__fecha = fecha
         self.__funcion = funcion
@@ -99,17 +97,17 @@ class compra:
         
         
     def calcular_total(self):
-        total = float(self_precio * self_asientos)
+        total = float(self.__precio * self.__asientos)
         return total
         
-    def generar_fecha(fecha_compra:str):
+    def generar_fecha(self,fecha_compra:str):
         # En los atributos, se debe pasar la fecha en string de la siguiente manera para convertirla: "27-5-2026 (fecha) 15:00:00 (hora)"
         fecha_convertida = datetime.strptime(fecha_compra, "%d-%m-%Y %H:%M:%S")
         return fecha_convertida
 
 
 class MetodoPago:
-    def _init_(self, monto, titular):
+    def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
 
@@ -119,8 +117,8 @@ class MetodoPago:
 
 # Pago con tarjeta
 class PagoTarjeta(MetodoPago):
-    def _init_(self, monto, titular, numero_tarjeta):
-        super()._init_(monto, titular)
+    def __init__(self, monto, titular, numero_tarjeta):
+        super().__init__(monto, titular)
         self.__numero_tarjeta = numero_tarjeta
 
     def procesar_pago(self):
@@ -129,8 +127,8 @@ class PagoTarjeta(MetodoPago):
 
 # Pago en efectivo
 class PagoEfectivo(MetodoPago):
-    def _init_(self, monto, titular, entregado):
-        super()._init_(monto, titular)
+    def __init__(self, monto, titular, entregado):
+        super().__init__(monto, titular)
         self.__entregado = entregado
 
     def calcular_vuelto(self, monto):
@@ -143,8 +141,8 @@ class PagoEfectivo(MetodoPago):
 
 # Pago por transferencia
 class PagoTransferencia(MetodoPago):
-    def _init_(self, monto, titular, banco):
-        super()._init_(monto, titular)
+    def __init__(self, monto, titular, banco):
+        super().__init__(monto, titular)
         self.__banco = banco
 
     def procesar_pago(self):
