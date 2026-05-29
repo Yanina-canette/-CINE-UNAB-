@@ -1,5 +1,5 @@
 from werkzeug.security import check_password_hash, generate_password_hash
-from cartelera import Funcion, compra, MetodoPago
+from cartelera import Funcion, Compra, Metodo_pago
 from datetime import datetime
 
 
@@ -66,7 +66,7 @@ class Cliente(Usuario):
         asiento_reservado = self.seleccionar_asiento(funcion, asiento)
         if asiento_reservado:
             pago = self.elegir_metodo_pago(metodo_pago)
-            return se asientolf.confirmar_compra(funcion,asiento,pago)
+            return self.confirmar_compra(funcion,asiento,pago)
         return "No se pudo completar la compra"
         
 

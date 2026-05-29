@@ -1,32 +1,32 @@
 class Pelicula:
     def __init__(self, data_json):
-        # Asignación automática usando .get() para evitar errores si falta algo
-        self.id_pelicula = None 
+        self.id_pelicula = None
         self.api_id = data_json.get("id")
         self.titulo = data_json.get("title")
         self.sinopsis = data_json.get("overview")
         self.calificacion = data_json.get("vote_average")
         self.fecha_estreno = data_json.get("release_date")
-        self.imagen = f"https://image.tmdb.org/t/p/w500{data_json.get('poster_path')}"
-        
-        # Atributos con valores por defecto si no vienen en este endpoint
-        self.genero = data_json.get("genre_ids", "N/A")
-        self.director = "Pendiente" 
-        self.duracion = 0
         self.idioma = data_json.get("original_language")
         self.clasificacion = "N/A"
+        self.director = None
+        self.duracion = None
 
-    def obtenerDetalles(self):
-        return f"{self.titulo} ({self.fecha_estreno[:4]})"
+        # Manejo seguro de imágenes (evita URLs con "None" al final)
+        poster = data_json.get("poster_path")
+        backdrop = data_json.get("backdrop_path")
+        self.poster_url = f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+        self.imagen_carru = f"https://image.tmdb.org/t/p/w1280{backdrop}" if backdrop else None
 
-# --- Así queda tu lógica principal mucho más limpia ---
-peliculas = []
-for item in data["results"]:
-    nueva_peli = Pelicula(item)
-    peliculas.append(nueva_peli)
+        # Guardamos los IDs , los nombres se resuelven aparte
+        self.genero_ids = data_json.get("genre_ids", [])
+        self.genero = "N/A"  # Se completa después con el diccionario de géneros
+
+    def __str__(self):
+        fecha = self.fecha_estreno[:4] if self.fecha_estreno else "S/F"
+        return f"{self.titulo} ({fecha})"
     
 
-class sala:
+class Sala:
     def __init__(self, numero_sala,capacidad, tipo_sala):
         self.numero_sala = numero_sala
         self.capacidad = capacidad
@@ -97,12 +97,12 @@ class Funcion:
         print("Sala:", self.sala)
         print("Precio:", self.precio)
 
-class entrada:
+class Entrada:
     def __init__(self,asiento,usuario,funcion,precio_final):
         pass
 
 
-class compra:
+class Compra:
     def __init__(self, precio, fecha, funcion, asientos):
         self.__precio = precio
         self.__fecha = fecha
@@ -127,7 +127,7 @@ class compra:
         return fecha_convertida
 
 
-class MetodoPago:
+class Metodo_pago:
     def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
@@ -137,7 +137,7 @@ class MetodoPago:
 
 
 # Pago con tarjeta
-class PagoTarjeta(MetodoPago):
+class PagoTarjeta(Metodo_pago):
     def __init__(self, monto, titular, numero_tarjeta):
         super().__init__(monto, titular)
         self.__numero_tarjeta = numero_tarjeta
@@ -147,7 +147,7 @@ class PagoTarjeta(MetodoPago):
 
 
 # Pago en efectivo
-class PagoEfectivo(MetodoPago):
+class PagoEfectivo(Metodo_pago):
     def __init__(self, monto, titular, entregado):
         super().__init__(monto, titular)
         self.__entregado = entregado
@@ -161,7 +161,7 @@ class PagoEfectivo(MetodoPago):
 
 
 # Pago por transferencia
-class PagoTransferencia(MetodoPago):
+class PagoTransferencia(Metodo_pago):
     def __init__(self, monto, titular, banco):
         super().__init__(monto, titular)
         self.__banco = banco
