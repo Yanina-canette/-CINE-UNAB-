@@ -108,12 +108,44 @@ class compra:
         return fecha_convertida
 
 
-class metodo_pago:
-    def _init(self,efectivo,tarjeta_deb,tarjeta_cred,mercado_pago):
+class MetodoPago:
+    def _init_(self, monto, titular):
+        self.__monto = monto
+        self.__titular = titular
+
+    def procesar_pago(self):
         pass
 
-    def elegir_pago(self):
-        pass
 
-    def aprobar_compra(self):
-        pass
+# Pago con tarjeta
+class PagoTarjeta(MetodoPago):
+    def _init_(self, monto, titular, numero_tarjeta):
+        super()._init_(monto, titular)
+        self.__numero_tarjeta = numero_tarjeta
+
+    def procesar_pago(self):
+        return f"Pago realizado con tarjeta terminada en {self.__numero_tarjeta[-4:]}"
+
+
+# Pago en efectivo
+class PagoEfectivo(MetodoPago):
+    def _init_(self, monto, titular, entregado):
+        super()._init_(monto, titular)
+        self.__entregado = entregado
+
+    def calcular_vuelto(self, monto):
+        return self.__entregado - monto
+
+    def procesar_pago(self):
+        vuelto = self.calcular_vuelto(2500)
+        return f"Pago en efectivo realizado. Vuelto: ${vuelto}"
+
+
+# Pago por transferencia
+class PagoTransferencia(MetodoPago):
+    def _init_(self, monto, titular, banco):
+        super()._init_(monto, titular)
+        self.__banco = banco
+
+    def procesar_pago(self):
+        return f"Transferencia realizada desde {self.__banco}"
