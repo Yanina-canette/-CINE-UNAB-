@@ -1,8 +1,29 @@
+class Pelicula:
+    def __init__(self, data_json):
+        # Asignación automática usando .get() para evitar errores si falta algo
+        self.id_pelicula = None 
+        self.api_id = data_json.get("id")
+        self.titulo = data_json.get("title")
+        self.sinopsis = data_json.get("overview")
+        self.calificacion = data_json.get("vote_average")
+        self.fecha_estreno = data_json.get("release_date")
+        self.imagen = f"https://image.tmdb.org/t/p/w500{data_json.get('poster_path')}"
+        
+        # Atributos con valores por defecto si no vienen en este endpoint
+        self.genero = data_json.get("genre_ids", "N/A")
+        self.director = "Pendiente" 
+        self.duracion = 0
+        self.idioma = data_json.get("original_language")
+        self.clasificacion = "N/A"
 
+    def obtenerDetalles(self):
+        return f"{self.titulo} ({self.fecha_estreno[:4]})"
 
-class pelicula:
-    def _init_(self):
-        pass
+# --- Así queda tu lógica principal mucho más limpia ---
+peliculas = []
+for item in data["results"]:
+    nueva_peli = Pelicula(item)
+    peliculas.append(nueva_peli)
     
 
 class sala:
