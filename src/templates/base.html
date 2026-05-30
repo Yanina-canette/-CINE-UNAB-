@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cine UNAB - Cartelera</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles3.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles5.css') }}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     {% block estilos %}{% endblock %}
@@ -42,11 +43,49 @@
 
 
 <footer>
-    ... mi contenido ...
-
-
     
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Logo UNAB">
+      <span>CINE<br>UNAB</span>
+    </div>
+
+    <div class="footer-col">
+      <h4>NOSOTROS</h4>
+      <a href="#">Términos y Condiciones</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>CONTÁCTANOS</h4>
+      <a href="#" class="footer-link-red">Botón de arrepentimiento</a>
+    </div>
+
+    <div class="footer-col footer-social">
+      <h4>SÍGUENOS</h4>
+      <div class="footer-icons">
+        <a href="https://www.facebook.com/universidadnacionalguillermobrown" target="_blank"
+            rel="noopener noreferrer" aria-label="Facebook">
+      <i class="fa-brands fa-facebook"></i>
+       </a>
+        <a href="https://x.com/unaboficial" target="_blank"
+            rel="noopener noreferrer" aria-label="X / Twitter">
+      <i class="fa-brands fa-x-twitter"></i>
+        </a>
+        <a href="https://www.instagram.com/unaboficial/?hl=es" target="_blank"
+            rel="noopener noreferrer" aria-label="Instagram">
+      <i class="fa-brands fa-instagram"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <span>Bartolomé Mitre 1399</span>
+  </div>
 </footer>
+ 
 
 </body>
 </html>
