@@ -34,6 +34,7 @@
     <div class="contenedor-cartelera-grilla" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px;">
       
       {% for peli in peliculas %} 
+    <a href="/pelicula/{{ peli.api_id }}" style="text-decoration: none;">
         <div class="tarjeta-peli" style="background: #1c2541; width: 180px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
           <img src="{{ peli.poster_url }}" alt="Póster de {{ peli.titulo }}" style="width: 100%; height: 330px; object-fit: cover;">
           <div style="padding: 15px; text-align: left; display: flex; flex-direction: column; flex-grow: 1;">
@@ -43,7 +44,8 @@
             </p>
           </div>
         </div>
-      {% endfor %}
+    </a>
+{% endfor %}
     </div>
       
 

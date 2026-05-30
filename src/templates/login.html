@@ -1,39 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
-</head>
+{% extends "base.html" %}
 
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+    <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; color: white; font-family: sans-serif;">
+        
+        <h2 style="text-align: center; margin-bottom: 30px;">Iniciar sesión</h2>
 
-<body>
-
-    <div class="login-container">
-
-        <h2>Iniciar sesión</h2>
-        <div class="login-inner">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for mensaje in messages %}
-                    <p style="color:red; margin-bottom:10px;">{{ mensaje }}</p>
+                    <p style="color: #f87171; text-align: center; margin-bottom: 10px;">{{ mensaje }}</p>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         <form action="/login" method="POST">
-            <label for="email">Correo</label>
-            <input type="email" name="email" placeholder="" required>
-            <label for="contraseña">Contraseña</label>
-            <input type="password" name="contraseña" placeholder="" required>
-        
-            <a href="/recuperar" class="link-olvide">Olvidé mi contraseña</a>
-            <button type="submit">Iniciar sesión</button>
-            <a href="/formulario" class="btn-crear">Crear cuenta</a>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Correo</label>
+                <input type="email" name="email" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Contraseña</label>
+                <input type="password" name="contraseña" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <a href="/recuperar" class="btn-animado"
+                style="display: block; text-align: center; color: #94a3b8; margin-bottom: 20px; font-size: 0.9rem;">Olvidé mi contraseña</a>
+            <button type="submit" class="btn-animado"
+                style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; margin-bottom: 10px;">
+                Iniciar sesión
+            </button>
+            <a href="/formulario" class="btn-animado"
+                style="display: block; text-align: center; width: 100%; padding: 12px; background: #1e3a5f; color: white; border-radius: 5px; font-size: 1rem; box-sizing: border-box;">
+                Crear cuenta
+            </a>
         </form>
-        </div>
     </div>
-
-</body>
-</html>
-
+</div>
+{% endblock %}

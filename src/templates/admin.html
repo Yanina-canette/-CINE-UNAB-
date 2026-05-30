@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 40px 20px; color: white; font-family: sans-serif;">
+    
+    <div style="max-width: 900px; margin: 0 auto;">
+        <h1 style="margin-bottom: 30px; font-size: 2rem;">Panel de Administrador</h1>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+            
+            <a href="/admin/funciones" style="text-decoration: none;">
+                <div style="background: #1c2541; padding: 30px; border-radius: 10px; text-align: center; cursor: pointer;">
+                    <h2 style="color: #3b82f6; margin-bottom: 10px;">🎬 Funciones</h2>
+                    <p style="color: #cbd5e1;">Crear y gestionar funciones</p>
+                </div>
+            </a>
+
+            <a href="/admin/salas" style="text-decoration: none;">
+                <div style="background: #1c2541; padding: 30px; border-radius: 10px; text-align: center; cursor: pointer;">
+                    <h2 style="color: #3b82f6; margin-bottom: 10px;">🏛 Salas</h2>
+                    <p style="color: #cbd5e1;">Crear y gestionar salas</p>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

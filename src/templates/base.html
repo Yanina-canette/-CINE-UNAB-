@@ -13,26 +13,29 @@
 
 <body >
 
-<header >
+<header>
     <div class="logo">
-        <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Logo UNAB">
+        <a href="{{ url_for('inicio') }}">
+            <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Logo UNAB">
+        </a>
     </div>
     <nav>
-        <a href="#" >Películas</a>
-        <a href="#" >Precio entradas</a>
+        <a href="#">Películas</a>
+        <a href="#">Precio entradas</a>
     </nav>
     <div class="usuario-header">
-    {% if usuario %}
-        <span style="color:white; font-weight:bold;">Hola, {{ usuario }}</span>
-        <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
-    {% else %}
-        <a href="{{ url_for('login') }}" style="text-decoration: none;">
-            <button class="btn-login">
-                <i class="fa-regular fa-user"></i>
-            </button>
-        </a>
-    {% endif %}
-</div>
+        {% if usuario %}
+            <a href="{{ url_for('perfil') }}" style="color:white; font-weight:bold;">Hola, {{ usuario }}</a>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" style="text-decoration: none;">
+                <button class="btn-login">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </a>
+        {% endif %}
+    </div>
+</header>
 
 </header>
 {% block contenido %}{% endblock %}   

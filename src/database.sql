@@ -20,7 +20,7 @@ CREATE TABLE peliculas (
     imagen_url VARCHAR(255),
     disponible BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-
+  
 );
 
 
