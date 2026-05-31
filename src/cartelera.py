@@ -1,11 +1,11 @@
 from datetime import datetime
 
-class pelicula:
+class Pelicula:
     def __init__(self):
         pass
     
 
-class sala:
+class Sala:
     def __init__(self, numero_sala,capacidad, tipo_sala):
         self.numero_sala = numero_sala
         self.capacidad = capacidad
@@ -76,12 +76,12 @@ class Funcion:
         print("Sala:", self.sala)
         print("Precio:", self.precio)
 
-class entrada:
+class Entrada:
     def __init__(self,asiento,usuario,funcion,precio_final):
         pass
 
 
-class compra:
+class Compra:
     def __init__(self, precio, fecha, funcion, asientos):
         self.__precio = precio
         self.__fecha = fecha
@@ -106,7 +106,7 @@ class compra:
         return fecha_convertida
 
 
-class MetodoPago:
+class Metodo_Pago:
     def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
@@ -116,7 +116,7 @@ class MetodoPago:
 
 
 # Pago con tarjeta
-class PagoTarjeta(MetodoPago):
+class PagoTarjeta(Metodo_Pago):
     def __init__(self, monto, titular, numero_tarjeta):
         super().__init__(monto, titular)
         self.__numero_tarjeta = numero_tarjeta
@@ -126,7 +126,7 @@ class PagoTarjeta(MetodoPago):
 
 
 # Pago en efectivo
-class PagoEfectivo(MetodoPago):
+class PagoEfectivo(Metodo_Pago):
     def __init__(self, monto, titular, entregado):
         super().__init__(monto, titular)
         self.__entregado = entregado
@@ -140,7 +140,7 @@ class PagoEfectivo(MetodoPago):
 
 
 # Pago por transferencia
-class PagoTransferencia(MetodoPago):
+class PagoTransferencia(Metodo_Pago):
     def __init__(self, monto, titular, banco):
         super().__init__(monto, titular)
         self.__banco = banco
