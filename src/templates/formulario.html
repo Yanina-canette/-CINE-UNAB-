@@ -1,98 +1,80 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base.html" %}
 
-<head>
+{% block estilos %}
 
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>FORMULARIO DE REGISTRO!</title>
+{% endblock %}
 
-</head>
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+    <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; color: white; font-family: sans-serif;">
+        
+        <h2 style="text-align: center; margin-bottom: 30px; font-size: 1.5rem;">REGISTRO DE USUARIO</h2>
 
-<body>
-    <div class="container">   
-        <div class="tittle">REGISTRO DE USUARIO</div>
-            {% with messages= get_flashed_messages() %}
-                {% if messages %}
-                    {% for mensaje in messages %}
-                        <p>{{mensaje}}</p>
-                     {% endfor %}
-                {% endif %}
-            {% endwith %}    
-                            
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for mensaje in messages %}
+                    <p style="color: #f87171; text-align: center; margin-bottom: 10px;">{{ mensaje }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-    <form ID="form-validation"  action="/formulario" method= "POST" novalidate>
-        <div class="form-group">
-            <span>nombre</span>
-            <input type="text" name="nombre" placeholder="Ingrese Nombre" required>
-            <small>Por favor ingrese Nombre</small>
-        </div>
-        <div class="form-group">
-            <span>apellido</span>
-            <input type="text" name="apellido" placeholder="Ingrese Apellido" required>
-            <small>Por favor ingrese Apellido</small>
-        </div>
-        <div class="form-group">
-            <span>telefono</span>
-             <input type="number" name="telefono" placeholder="Ingrese Telefono" required>
-            <small>Por favor ingrese Telefono</small>
-        </div>
-        <div class="form-group">
-            <span>¿Es estudiante?</span>
-                <select name="es_estudiante" required style="height: 40px; width: 100%; border-radius: 5px; border: 1px solid #ccc; padding-left: 10px; outline: none;">
+        <form id="form-validation" action="/formulario" method="POST" novalidate>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NOMBRE</label>
+                <input type="text" name="nombre" placeholder="Ingrese Nombre" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">APELLIDO</label>
+                <input type="text" name="apellido" placeholder="Ingrese Apellido" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">TELÉFONO</label>
+                <input type="number" name="telefono" placeholder="Ingrese Telefono" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">¿ES ESTUDIANTE?</label>
+                <select name="es_estudiante" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="si">Sí</option>
                     <option value="no">No</option>
                 </select>
-                <small>Por favor seleccione una opción</small>
             </div>
-            <div class="form-group">
-                <span>email</span>
-                <input type="email" name="email" placeholder="Ingrese Email" required>
-                <small>Por favor ingrese Email</small>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">EMAIL</label>
+                <input type="email" name="email" placeholder="Ingrese Email" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
-            <div class="form-group">
-                <span>contraseña</span>
-                <input type="password" name="contraseña" placeholder="Ingrese Contraseña" required>
-                <small>Por favor ingrese Contraseña</small>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONTRASEÑA</label>
+                <input type="password" name="contraseña" placeholder="Ingrese Contraseña" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
-            <div class="form-group">
-                <span>confirmar Contraseña</span>
-                <input type="password" name="confirmar" placeholder="Ingrese Contraseña" required>
-                <small>Por favor ingrese confirme Contraseña </small>
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONFIRMAR CONTRASEÑA</label>
+                <input type="password" name="confirmar" placeholder="Confirme Contraseña" required
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
-            <div class="button">
-                <input type="submit" value="REGISTRARSE">
-            </div>
+            <button type="submit"
+                style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">
+                REGISTRARSE
+            </button>
         </form>
     </div>
+</div>
 
-    <script>
-        const addForm = document.getElementById("form-validation");
-        addForm.addEventListener("submit", (e) => {
-
-            const pass = document.querySelector('input[name="contraseña"]').value;
-            const confirmar = document.querySelector('input[name="confirmar"]').value;
-        
-            if (pass !== confirmar) {
-                e.preventDefault();
-                alert("Las contraseñas no coinciden");
-                return;
-            }
-
-            if(addForm.checkValidity() === false ) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            addForm.classList.add('was-validated');
-            
-        });
-    </script>
-
-</body>
-
-</html>
+<script>
+    const addForm = document.getElementById("form-validation");
+    addForm.addEventListener("submit", (e) => {
+        const pass = document.querySelector('input[name="contraseña"]').value;
+        const confirmar = document.querySelector('input[name="confirmar"]').value;
+        if (pass !== confirmar) {
+            e.preventDefault();
+            alert("Las contraseñas no coinciden");
+        }
+    });
+</script>
+{% endblock %}

@@ -1,5 +1,5 @@
 from werkzeug.security import check_password_hash, generate_password_hash
-from cartelera import Funcion, Compra, Metodo_Pago
+from cartelera import Funcion, Compra, MetodoPago
 from datetime import datetime
 
 

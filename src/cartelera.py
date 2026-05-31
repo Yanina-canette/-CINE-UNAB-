@@ -1,9 +1,28 @@
 from datetime import datetime
 
 class Pelicula:
-    def __init__(self):
-        pass
-    
+    def __init__(self, data_json):
+        self.id_pelicula = None
+        self.api_id = data_json.get("id")
+        self.titulo = data_json.get("title")
+        self.sinopsis = data_json.get("overview")
+        self.calificacion = data_json.get("vote_average")
+        self.fecha_estreno = data_json.get("release_date")
+        self.idioma = data_json.get("original_language")
+        self.clasificacion = "N/A"
+        self.director = None
+        self.duracion = None
+
+        # Manejo seguro de imágenes (evita URLs con "None" al final)
+        poster = data_json.get("poster_path")
+        backdrop = data_json.get("backdrop_path")
+        self.poster_url = f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+        self.imagen_carru = f"https://image.tmdb.org/t/p/w1280{backdrop}" if backdrop else None
+
+        # Guardamos los IDs , los nombres se resuelven aparte
+        self.genero_ids = data_json.get("genre_ids", [])
+        self.genero = "N/A"  # Se completa después con el diccionario de géneros
+
 
 class Sala:
     def __init__(self, numero_sala,capacidad, tipo_sala):
@@ -106,7 +125,7 @@ class Compra:
         return fecha_convertida
 
 
-class Metodo_Pago:
+class MetodoPago:
     def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
@@ -116,7 +135,7 @@ class Metodo_Pago:
 
 
 # Pago con tarjeta
-class PagoTarjeta(Metodo_Pago):
+class PagoTarjeta(MetodoPago):
     def __init__(self, monto, titular, numero_tarjeta):
         super().__init__(monto, titular)
         self.__numero_tarjeta = numero_tarjeta
@@ -126,7 +145,7 @@ class PagoTarjeta(Metodo_Pago):
 
 
 # Pago en efectivo
-class PagoEfectivo(Metodo_Pago):
+class PagoEfectivo(MetodoPago):
     def __init__(self, monto, titular, entregado):
         super().__init__(monto, titular)
         self.__entregado = entregado
@@ -140,7 +159,7 @@ class PagoEfectivo(Metodo_Pago):
 
 
 # Pago por transferencia
-class PagoTransferencia(Metodo_Pago):
+class PagoTransferencia(MetodoPago):
     def __init__(self, monto, titular, banco):
         super().__init__(monto, titular)
         self.__banco = banco

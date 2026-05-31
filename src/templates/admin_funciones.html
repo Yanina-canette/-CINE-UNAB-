@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 40px 20px; color: white; font-family: sans-serif;">
+    <div style="max-width: 800px; margin: 0 auto;">
+
+        <a href="/admin" style="color: #3b82f6;">← Volver al panel</a>
+        <h1 style="margin: 20px 0 30px;">Gestionar Funciones</h1>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for mensaje in messages %}
+                    <p style="color: #4ade80; margin-bottom: 15px;">{{ mensaje }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Formulario nueva función -->
+        <div style="background: #1c2541; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+            <h2 style="margin-bottom: 20px;">Nueva Función</h2>
+            <form action="/admin/funciones" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">ID de película (TMDB)</label>
+                    <input type="number" name="api_id" placeholder="Ej: 1339713" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Título</label>
+                    <input type="text" name="titulo" placeholder="Ej: Obsesión" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Sala</label>
+                    <select name="sala_id" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                        {% for sala in salas %}
+                            <option value="{{ sala.id }}">{{ sala.nombre }} ({{ sala.capacidad }} asientos)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Fecha</label>
+                    <input type="date" name="fecha" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Hora</label>
+                    <input type="time" name="hora" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                </div>
+                <button type="submit"
+                    style="padding: 10px 25px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Crear Función
+                </button>
+            </form>
+        </div>
+
+        <!-- Lista de funciones -->
+        <h2 style="margin-bottom: 15px;">Funciones creadas</h2>
+        {% if funciones %}
+            {% for funcion in funciones %}
+                <div style="background: #1c2541; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <span>{{ funcion.titulo }}</span>
+                    <span>{{ funcion.sala }}</span>
+                    <span>{{ funcion.fecha }}</span>
+                    <span>{{ funcion.hora }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #94a3b8;">No hay funciones creadas todavía.</p>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

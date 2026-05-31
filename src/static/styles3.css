@@ -23,8 +23,6 @@ header {
 
 header a {
     text-decoration: none;
-    display: flex;
-    align-items: center;
 }
 
 .logo {
@@ -75,7 +73,7 @@ nav a.active {
 }
 
 .btn-logout {
-    background: #e74c3c;
+    background: #3cb9e7;
     color: white;
     padding: 8px 15px;
     border-radius: 5px;
@@ -161,5 +159,13 @@ nav a.active {
       display:none;
     }
 }
-  
+.usuario-header a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.usuario-header a:hover {
+    text-decoration: underline;
+}
 
