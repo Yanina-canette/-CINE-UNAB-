@@ -6,6 +6,8 @@ import os
 import requests
 from cartelera import Pelicula,Sala,Funcion,Entrada,Compra, Metodo_pago
 from usuarios import Usuario,Administrador,Cliente
+from dotenv import load_dotenv          
+load_dotenv()  
 
 
 
@@ -19,11 +21,12 @@ app.secret_key = os.environ.get("SECRET_KEY", "fallback_solo_en_dev")
 pool = pooling.MySQLConnectionPool(
     pool_name="cine_pool",
     pool_size=5,
-    host="localhost",
-    user="root",
-    password="",
-    database="cine_database"
-    
+    host=os.getenv('DB_HOST'),
+    port=int(os.getenv('DB_PORT', '3306')),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD'),
+    database=os.getenv('DB_NAME'),   
+    use_pure=True  
 )
 
 def get_conexion():
