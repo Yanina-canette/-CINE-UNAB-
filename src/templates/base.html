@@ -24,17 +24,20 @@
         <a href="#">Películas</a>
         <a href="#">Precio entradas</a>
     </nav>
-    <div class="usuario-header">
-        {% if usuario %}
-            <a href="{{ url_for('perfil') }}" style="color:white; font-weight:bold;">Hola, {{ usuario }}</a>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" style="text-decoration: none;">
-                <button class="btn-login">
-                    <i class="fa-regular fa-user"></i>
-                </button>
-            </a>
-        {% endif %}
+    {% if usuario %}
+    <a href="{{ url_for('perfil') }}" style="color:white; font-weight:bold;">Hola, {{ usuario }}</a>
+    {% if es_admin %}
+        <a href="{{ url_for('admin') }}" style="color:#3b82f6; margin-right:10px;">⚙ Admin</a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
+{% else %}
+    <a href="{{ url_for('login') }}" style="text-decoration: none;">
+        <button class="btn-login">
+            <i class="fa-regular fa-user"></i>
+        </button>
+    </a>
+{% endif %}
+      
     </div>
 </header>
 
