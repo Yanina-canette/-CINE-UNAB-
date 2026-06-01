@@ -4,8 +4,12 @@ from mysql.connector import pooling
 from flask import session
 import os
 import requests
-from cartelera import Pelicula, Sala, Funcion, Entrada, Compra, MetodoPago, PagoEfectivo,PagoTarjeta,PagoTransferencia
-from usuarios import Usuario, Administrador, Cliente
+from cartelera import Pelicula,Sala,Funcion,Entrada,Compra, Metodo_pago
+from usuarios import Usuario,Administrador,Cliente
+from dotenv import load_dotenv          
+load_dotenv()  
+
+
 
 
 app = Flask(__name__, template_folder="templates",
@@ -17,26 +21,43 @@ app.secret_key = os.environ.get("SECRET_KEY", "fallback_solo_en_dev")
 pool = pooling.MySQLConnectionPool(
     pool_name="cine_pool",
     pool_size=5,
-    host="localhost",
-    user="root",
-    password="",
-    database="cine_database"
-
+    host=os.getenv('DB_HOST'),
+    port=int(os.getenv('DB_PORT', '3306')),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD'),
+    database=os.getenv('DB_NAME'),   
+    use_pure=True  
 )
 
+@app.context_processor
+def inject_es_admin():
+    usuario = session.get('usuario')
+    es_admin = False
+    if usuario:
+        try:
+            conexion = get_conexion()
+            cursor = conexion.cursor(dictionary=True)
+            cursor.execute("SELECT es_admin FROM usuarios WHERE nombre=%s", (usuario,))
+            resultado = cursor.fetchone()
+            es_admin = bool(resultado and resultado['es_admin'])
+            cursor.close()
+            conexion.close()
+        except:
+            pass
+    return dict(es_admin=es_admin)
 
 def get_conexion():
     return pool.get_connection()
 
 
-@app.route('/')
+@app.route('/') 
 def inicio():
     return redirect(url_for('peliculas'))
 
 
 @app.route('/logout')
 def logout():
-    session.pop('usuario', None)
+    session.pop('usuario',None)
     return redirect(url_for('login'))
 
 
@@ -54,37 +75,39 @@ def formulario():
         confirmar = request.form['confirmar']
 
         if contraseña != confirmar:
-            flash("las contraseñas no coinciden")
+            flash("Las contraseñas no coinciden")
             return redirect(url_for('formulario'))
 
-        conexion = get_conexion()
+        # Manejo de imagen
+        imagen_path = None
+        if es_estudiante and 'imagen_estudiante' in request.files:
+            imagen = request.files['imagen_estudiante']
+            if imagen.filename != '':
+                import uuid
+                extension = imagen.filename.rsplit('.', 1)[-1].lower()
+                nombre_archivo = f"{uuid.uuid4().hex}.{extension}"
+                carpeta = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+                os.makedirs(carpeta, exist_ok=True)
+                imagen.save(os.path.join(carpeta, nombre_archivo))
+                imagen_path = nombre_archivo
 
+        conexion = get_conexion()
         try:
             cursor = conexion.cursor()
-
-            cursor.execute(
-                "SELECT * FROM usuarios WHERE email=%s",
-                (email,))
-
-            usuario = cursor.fetchone()
-
-            if usuario:
+            cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
+            if cursor.fetchone():
                 flash("Email ya existente")
                 return redirect(url_for('formulario'))
 
             contraseña_hash = generate_password_hash(contraseña)
-
             sql = """
-            INSERT INTO usuarios(nombre,apellido,telefono,es_estudiante,email,password_hash)
-            VALUES(%s,%s,%s,%s,%s,%s)
+            INSERT INTO usuarios(nombre, apellido, telefono, es_estudiante, email, password_hash, imagen_estudiante, verificado_estudiante)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
             """
-
-            valores = (nombre, apellido, telefono,
-                       es_estudiante, email, contraseña_hash)
-
+            estado = 'pendiente' if es_estudiante else None
+            valores = (nombre, apellido, telefono, es_estudiante, email, contraseña_hash, imagen_path, estado)
             cursor.execute(sql, valores)
             conexion.commit()
-
             flash("Usuario registrado correctamente")
             return redirect(url_for('login'))
 
@@ -94,21 +117,20 @@ def formulario():
 
     return render_template('formulario.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
-        contraseña = request.form['contraseña']
+        email= request.form ['email']
+        contraseña= request.form ['contraseña']
 
-        conexion = get_conexion()
+        conexion = get_conexion()  
         try:
 
             cursor = conexion.cursor()
 
             cursor.execute(
-                "SELECT nombre, password_hash FROM usuarios WHERE email=%s",
-                (email,))
+            "SELECT nombre, password_hash FROM usuarios WHERE email=%s",
+            (email,))
 
             usuario = cursor.fetchone()
 
@@ -118,7 +140,7 @@ def login():
                 hash_db = usuario[1]
 
                 if check_password_hash(hash_db, contraseña):
-                    session['usuario'] = nombre_db
+                    session ['usuario'] = nombre_db
                     flash(f"Bienvenido {nombre_db}")
                     return redirect(url_for('inicio'))
                 else:
@@ -128,13 +150,12 @@ def login():
             else:
                 flash("Email no registrado")
                 return redirect(url_for('login'))
-
+            
         finally:
-            cursor.close()
-            conexion.close()
-
+            cursor.close()      
+            conexion.close() 
+        
     return render_template('login.html')
-
 
 @app.route('/recuperar', methods=['GET', 'POST'])
 def recuperar():
@@ -172,27 +193,24 @@ def recuperar():
 
     return render_template('recuperar.html')
 
-
 @app.route('/peliculas')
 def peliculas():
     usuario = session.get("usuario", None)
-
+    
     url = "https://api.themoviedb.org/3/movie/now_playing?api_key=9ca3c028ce5b15354d7a635e4a9db833&language=es-ES&region=AR"
-
+    
     try:
         respuesta = requests.get(url)  # ✅ Sacamos verify=False
         datos = respuesta.json()
         peliculas_api = datos.get("results", [])
-
-        lista_peliculas = [Pelicula(p)
-                           for p in peliculas_api[:6]]  # ✅ Usamos la clase
-
+        
+        lista_peliculas = [Pelicula(p) for p in peliculas_api[:6]]  # ✅ Usamos la clase
+            
     except Exception as e:
         print(f"Error al conectar con la API: {e}")
         lista_peliculas = []
 
     return render_template("peliculas.html", usuario=usuario, peliculas=lista_peliculas)
-
 
 @app.route('/pelicula/<int:api_id>')
 def detalle_pelicula(api_id):
@@ -200,9 +218,8 @@ def detalle_pelicula(api_id):
 
     # 1. Traemos los detalles de la película desde TMDB
     API_KEY = "9ca3c028ce5b15354d7a635e4a9db833"
-    url = f"https://api.themoviedb.org/3/movie/{
-        api_id}?api_key={API_KEY}&language=es-ES"
-
+    url = f"https://api.themoviedb.org/3/movie/{api_id}?api_key={API_KEY}&language=es-ES"
+    
     try:
         respuesta = requests.get(url)
         datos = respuesta.json()
@@ -231,33 +248,30 @@ def detalle_pelicula(api_id):
 
     return render_template("detalle_pelicula.html", usuario=usuario, pelicula=pelicula, funciones=funciones)
 
-
 @app.route('/admin')
 def admin():
     usuario = session.get("usuario", None)
-
+    
     if not usuario:
         flash("Tenés que iniciar sesión")
         return redirect(url_for('login'))
-
+    
     # Verificamos si es admin en la DB
     conexion = get_conexion()
     try:
         cursor = conexion.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT es_admin FROM usuarios WHERE nombre=%s", (usuario,))
+        cursor.execute("SELECT es_admin FROM usuarios WHERE nombre=%s", (usuario,))
         resultado = cursor.fetchone()
-
+        
         if not resultado or not resultado['es_admin']:
             flash("No tenés permisos de administrador")
             return redirect(url_for('peliculas'))
-
+            
     finally:
         cursor.close()
         conexion.close()
-
+    
     return render_template("admin.html", usuario=usuario)
-
 
 @app.route('/admin/salas', methods=['GET', 'POST'])
 def admin_salas():
@@ -272,8 +286,7 @@ def admin_salas():
         if request.method == 'POST':
             nombre = request.form['nombre']
             capacidad = request.form['capacidad']
-            cursor.execute(
-                "INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)", (nombre, capacidad))
+            cursor.execute("INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)", (nombre, capacidad))
             conexion.commit()
             flash("Sala creada correctamente")
 
@@ -285,7 +298,6 @@ def admin_salas():
         conexion.close()
 
     return render_template("admin_salas.html", usuario=usuario, salas=salas)
-
 
 @app.route('/admin/funciones', methods=['GET', 'POST'])
 def admin_funciones():
@@ -305,8 +317,7 @@ def admin_funciones():
             hora = request.form['hora']
 
             # Verificamos si la pelicula ya existe en la DB
-            cursor.execute(
-                "SELECT id FROM peliculas WHERE api_id = %s", (api_id,))
+            cursor.execute("SELECT id FROM peliculas WHERE api_id = %s", (api_id,))
             pelicula = cursor.fetchone()
 
             if not pelicula:
@@ -345,7 +356,6 @@ def admin_funciones():
 
     return render_template("admin_funciones.html", usuario=usuario, salas=salas, funciones=funciones)
 
-
 @app.route('/perfil')
 def perfil():
     usuario = session.get("usuario", None)
@@ -355,15 +365,62 @@ def perfil():
     conexion = get_conexion()
     try:
         cursor = conexion.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT nombre, apellido, email, telefono, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
+        cursor.execute("SELECT nombre, apellido, email, telefono, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
         datos = cursor.fetchone()
     finally:
         cursor.close()
         conexion.close()
 
     return render_template("perfil.html", usuario=usuario, datos=datos)
+@app.route('/admin/estudiantes')
+def admin_estudiantes():
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
 
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, nombre, apellido, email, imagen_estudiante, verificado_estudiante 
+            FROM usuarios 
+            WHERE es_estudiante = 1 
+            ORDER BY verificado_estudiante ASC
+        """)
+        estudiantes = cursor.fetchall()
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return render_template('admin_estudiantes.html', usuario=usuario, estudiantes=estudiantes)
+
+
+@app.route('/admin/estudiantes/<int:id>/aprobar', methods=['POST'])
+def aprobar_estudiante(id):
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE usuarios SET verificado_estudiante='aprobado' WHERE id=%s", (id,))
+        conexion.commit()
+        flash("Estudiante aprobado")
+    finally:
+        cursor.close()
+        conexion.close()
+    return redirect(url_for('admin_estudiantes'))
+
+
+@app.route('/admin/estudiantes/<int:id>/rechazar', methods=['POST'])
+def rechazar_estudiante(id):
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE usuarios SET verificado_estudiante='rechazado' WHERE id=%s", (id,))
+        conexion.commit()
+        flash("Estudiante rechazado")
+    finally:
+        cursor.close()
+        conexion.close()
+    return redirect(url_for('admin_estudiantes'))
 
 if __name__ == '__main__':
     # Esto enciende el servidor web

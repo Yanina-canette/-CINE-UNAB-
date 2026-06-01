@@ -18,7 +18,7 @@
             {% endif %}
         {% endwith %}
 
-        <form id="form-validation" action="/formulario" method="POST" novalidate>
+        <form id="form-validation" action="/formulario" method="POST" enctype="multipart/form-data" novalidate>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NOMBRE</label>
                 <input type="text" name="nombre" placeholder="Ingrese Nombre" required
@@ -36,13 +36,21 @@
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">¿ES ESTUDIANTE?</label>
-                <select name="es_estudiante" required
+                <select name="es_estudiante" id="es_estudiante" required
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="si">Sí</option>
                     <option value="no">No</option>
                 </select>
             </div>
+
+            <div id="div_imagen" style="margin-bottom: 15px; display:none;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">IMAGEN DE ALUMNO REGULAR</label>
+                <input type="file" name="imagen_estudiante" accept="image/*"
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <small style="color: #94a3b8;">Subí una foto de tu credencial o certificado de alumno regular</small>
+            </div>
+
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">EMAIL</label>
                 <input type="email" name="email" placeholder="Ingrese Email" required
@@ -67,6 +75,11 @@
 </div>
 
 <script>
+    document.getElementById('es_estudiante').addEventListener('change', function() {
+        document.getElementById('div_imagen').style.display = 
+            this.value === 'si' ? 'block' : 'none';
+    });
+
     const addForm = document.getElementById("form-validation");
     addForm.addEventListener("submit", (e) => {
         const pass = document.querySelector('input[name="contraseña"]').value;
