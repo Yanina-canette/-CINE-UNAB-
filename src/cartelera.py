@@ -101,11 +101,12 @@ class Entrada:
 
 
 class Compra:
-    def __init__(self, precio, fecha, funcion, asientos):
+    def __init__(self, precio, fecha, funcion, asientos, es_estudiante:bool):
         self.__precio = precio
         self.__fecha = fecha
         self.__funcion = funcion
         self.__asientos = asientos
+        self.__es_estudiante = es_estudiante
         
     def validar_asientos(self):
         asientos_por_fila = 5
@@ -117,7 +118,10 @@ class Compra:
         
     def calcular_total(self):
         total = float(self.__precio * self.__asientos)
-        return total
+        if self.__es_estudiante == True:
+            return total/2
+        else:
+            return total
         
     def generar_fecha(self,fecha_compra:str):
         # En los atributos, se debe pasar la fecha en string de la siguiente manera para convertirla: "27-5-2026 (fecha) 15:00:00 (hora)"
@@ -129,9 +133,6 @@ class MetodoPago:
     def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
-
-    def procesar_pago(self):
-        pass
 
 
 # Pago con tarjeta
@@ -158,11 +159,12 @@ class PagoEfectivo(MetodoPago):
         return f"Pago en efectivo realizado. Vuelto: ${vuelto}"
 
 
-# Pago por transferencia
-class PagoTransferencia(MetodoPago):
-    def __init__(self, monto, titular, banco):
+# Pago por mercado pago
+class PagoMercadoPago(MetodoPago):
+    def __init__(self, monto, titular):
         super().__init__(monto, titular)
-        self.__banco = banco
+        self.__link = "https://link.mercadopago.com.ar/karimsilva"
 
     def procesar_pago(self):
-        return f"Transferencia realizada desde {self.__banco}"
+        return self.__link
+

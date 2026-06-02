@@ -420,6 +420,131 @@ def rechazar_estudiante(id):
         conexion.close()
     return redirect(url_for('admin_estudiantes'))
 
+@app.route('/comprar/<int:funcion_id>')
+def seleccionar_asientos(funcion_id):
+    usuario = session.get("usuario", None)
+    if not usuario:
+        flash("Tenés que iniciar sesión para comprar entradas")
+        return redirect(url_for('login'))
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        
+        # Traemos info de la función
+        cursor.execute("""
+            SELECT f.id, f.fecha, f.hora, s.nombre as sala, s.capacidad,
+                   p.titulo, p.api_id
+            FROM funciones f
+            JOIN salas s ON f.sala_id = s.id
+            JOIN peliculas p ON f.pelicula_id = p.id
+            WHERE f.id = %s
+        """, (funcion_id,))
+        funcion = cursor.fetchone()
+
+        # Traemos asientos ocupados para esta función
+        cursor.execute("""
+            SELECT numero_asiento FROM asientos_funcion
+            WHERE funcion_id = %s AND ocupado = TRUE
+        """, (funcion_id,))
+        ocupados = [row['numero_asiento'] for row in cursor.fetchall()]
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return render_template("seleccionar_asientos.html", 
+                         usuario=usuario,
+                         funcion=funcion, 
+                         ocupados=ocupados)
+
+@app.route('/pagar', methods=['GET', 'POST'])
+def pagar():
+    usuario = session.get("usuario", None)
+    if not usuario:
+        flash("Tenés que iniciar sesión para comprar entradas")
+        return redirect(url_for('login'))
+
+    funcion_id = request.form.get('funcion_id')
+    asientos = request.form.get('asientos')
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT f.id, f.fecha, f.hora, s.nombre as sala,
+                   p.titulo, p.precio_base
+            FROM funciones f
+            JOIN salas s ON f.sala_id = s.id
+            JOIN peliculas p ON f.pelicula_id = p.id
+            WHERE f.id = %s
+        """, (funcion_id,))
+        funcion = cursor.fetchone()
+    finally:
+        cursor.close()
+        conexion.close()
+
+    lista_asientos = [int(a) for a in asientos.split(',')]
+    total = len(lista_asientos) * 1500
+
+    return render_template("pagar.html",
+                         usuario=usuario,
+                         funcion=funcion,
+                         asientos=lista_asientos,
+                         total=total)
+
+@app.route('/confirmar_compra', methods=['POST'])
+def confirmar_compra():
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
+
+    funcion_id = request.form.get('funcion_id')
+    asientos = request.form.get('asientos')
+    total = request.form.get('total')
+    metodo_pago = request.form.get('metodo_pago')
+
+    lista_asientos = [int(a) for a in asientos.split(',')]
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+
+        # Traemos el id del usuario
+        cursor.execute("SELECT id, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_db = cursor.fetchone()
+        usuario_id = usuario_db['id']
+
+        # Guardamos la compra
+        cursor.execute("""
+            INSERT INTO compras (usuario_id, funcion_id, cantidad_entradas, precio_total)
+            VALUES (%s, %s, %s, %s)
+        """, (usuario_id, funcion_id, len(lista_asientos), total))
+        conexion.commit()
+
+        # Marcamos los asientos como ocupados
+        for numero in lista_asientos:
+            cursor.execute("""
+                INSERT INTO asientos_funcion (funcion_id, numero_asiento, ocupado)
+                VALUES (%s, %s, TRUE)
+                ON DUPLICATE KEY UPDATE ocupado = TRUE
+            """, (funcion_id, numero))
+        conexion.commit()
+
+        flash(f"¡Compra realizada con éxito! Método: {metodo_pago}")
+        return redirect(url_for('compra_exitosa'))
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
+@app.route('/compra_exitosa')
+def compra_exitosa():
+    usuario = session.get("usuario", None)
+    return render_template("compra_exitosa.html", usuario=usuario)  
+
+
 if __name__ == '__main__':
     # Esto enciende el servidor web
     app.run(debug=True)
