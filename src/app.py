@@ -354,6 +354,8 @@ def admin_funciones():
 
     return render_template("admin_funciones.html", usuario=usuario, salas=salas, funciones=funciones)
 
+
+
 @app.route('/perfil')
 def perfil():
     usuario = session.get("usuario", None)
@@ -363,13 +365,28 @@ def perfil():
     conexion = get_conexion()
     try:
         cursor = conexion.cursor(dictionary=True)
-        cursor.execute("SELECT nombre, apellido, email, telefono, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
+        cursor.execute("SELECT id, nombre, apellido, email, telefono, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
         datos = cursor.fetchone()
+
+        cursor.execute("""
+            SELECT c.id, c.cantidad_entradas, c.precio_total, c.fecha_compra,
+                   p.titulo, f.fecha, f.hora, s.nombre as sala
+            FROM compras c
+            JOIN funciones f ON c.funcion_id = f.id
+            JOIN peliculas p ON f.pelicula_id = p.id
+            JOIN salas s ON f.sala_id = s.id
+            WHERE c.usuario_id = %s
+            ORDER BY c.fecha_compra DESC
+        """, (datos['id'],))
+        compras = cursor.fetchall()
+
     finally:
         cursor.close()
         conexion.close()
 
-    return render_template("perfil.html", usuario=usuario, datos=datos)
+    return render_template("perfil.html", usuario=usuario, datos=datos, compras=compras)
+    
+
 @app.route('/admin/estudiantes')
 def admin_estudiantes():
     usuario = session.get("usuario", None)
@@ -480,12 +497,20 @@ def pagar():
             WHERE f.id = %s
         """, (funcion_id,))
         funcion = cursor.fetchone()
+
+        cursor.execute("SELECT es_estudiante, verificado_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_db = cursor.fetchone()
+        es_estudiante = usuario_db and usuario_db['es_estudiante'] and usuario_db['verificado_estudiante'] == 'aprobado'
+
     finally:
         cursor.close()
         conexion.close()
 
     lista_asientos = [int(a) for a in asientos.split(',')]
-    total = len(lista_asientos) * 1500
+    precio = 1500
+    total = len(lista_asientos) * precio
+    if es_estudiante:
+        total = total / 2
 
     return render_template("pagar.html",
                          usuario=usuario,

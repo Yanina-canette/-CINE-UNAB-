@@ -163,7 +163,7 @@ class PagoEfectivo(MetodoPago):
 class PagoMercadoPago(MetodoPago):
     def __init__(self, monto, titular):
         super().__init__(monto, titular)
-        self.__link = "https://link.mercadopago.com.ar/karimsilva"
+        self.__link = "link.mercadopago.com.ar/cineunab"
 
     def procesar_pago(self):
         return self.__link
