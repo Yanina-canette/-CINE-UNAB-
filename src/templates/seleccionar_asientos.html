@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 40px 20px; color: white; font-family: sans-serif;">
+  <div style="max-width: 700px; margin: 0 auto;">
+
+    <a href="/pelicula/{{ funcion.api_id }}" style="color: #3b82f6;">← Volver</a>
+    <h1 style="margin: 20px 0 5px;">{{ funcion.titulo }}</h1>
+    <p style="color: #cbd5e1; margin-bottom: 5px;">📅 {{ funcion.fecha }} — 🕐 {{ funcion.hora }}</p>
+    <p style="color: #cbd5e1; margin-bottom: 30px;">🎭 Sala: {{ funcion.sala }}</p>
+
+    <!-- Pantalla -->
+    <div style="background: #3b82f6; text-align: center; padding: 8px; border-radius: 5px; margin-bottom: 30px; color: white; font-weight: bold; letter-spacing: 3px;">
+      PANTALLA
+    </div>
+
+    <!-- Mapa de asientos -->
+    <div id="mapa-asientos" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px;">
+      {% for numero in range(1, funcion.capacidad + 1) %}
+        <div class="asiento {% if numero in ocupados %}ocupado{% else %}libre{% endif %}"
+             data-numero="{{ numero }}"
+             onclick="seleccionar(this)"
+             style="width: 45px; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer;
+             background: {% if numero in ocupados %}#ef4444{% else %}#22c55e{% endif %};">
+          {{ numero }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Referencia -->
+    <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; font-size: 0.9rem;">
+      <span><span style="background:#22c55e; padding: 3px 10px; border-radius: 4px;">  </span> Libre</span>
+      <span><span style="background:#ef4444; padding: 3px 10px; border-radius: 4px;">  </span> Ocupado</span>
+      <span><span style="background:#f59e0b; padding: 3px 10px; border-radius: 4px;">  </span> Seleccionado</span>
+    </div>
+
+    <!-- Resumen -->
+    <div style="background: #1c2541; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+      <p>Asientos seleccionados: <span id="resumen-asientos" style="color: #f59e0b; font-weight: bold;">Ninguno</span></p>
+      <p style="margin-top: 10px;">Total: <span id="resumen-total" style="color: #4ade80; font-weight: bold;">$0</span></p>
+    </div>
+
+    <!-- Botón continuar -->
+    <form action="/pagar" method="POST" id="form-compra">
+      <input type="hidden" name="funcion_id" value="{{ funcion.id }}">
+      <input type="hidden" name="asientos" id="input-asientos" value="">
+      <button type="submit" id="btn-comprar" disabled
+        style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; opacity: 0.5;">
+        Continuar con el pago →
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  const PRECIO = 1500;
+  let seleccionados = [];
+
+  function seleccionar(el) {
+    if (el.classList.contains('ocupado')) return;
+
+    const numero = parseInt(el.dataset.numero);
+
+    if (seleccionados.includes(numero)) {
+      seleccionados = seleccionados.filter(n => n !== numero);
+      el.style.background = '#22c55e';
+    } else {
+      seleccionados.push(numero);
+      el.style.background = '#f59e0b';
+    }
+
+    // Actualizar resumen
+    document.getElementById('resumen-asientos').textContent = 
+      seleccionados.length > 0 ? seleccionados.join(', ') : 'Ninguno';
+    document.getElementById('resumen-total').textContent = 
+      '$' + (seleccionados.length * PRECIO).toLocaleString('es-AR');
+    document.getElementById('input-asientos').value = seleccionados.join(',');
+
+    // Activar botón
+    const btn = document.getElementById('btn-comprar');
+    btn.disabled = seleccionados.length === 0;
+    btn.style.opacity = seleccionados.length === 0 ? '0.5' : '1';
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 40px 20px; color: white; font-family: sans-serif;">
+  <div style="max-width: 600px; margin: 0 auto;">
+
+    <h1 style="margin-bottom: 30px;">💳 Método de Pago</h1>
+
+    <!-- Resumen de compra -->
+    <div style="background: #1c2541; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+      <h2 style="color: #3b82f6; margin-bottom: 15px;">Resumen</h2>
+      <p style="margin-bottom: 8px;">🎬 {{ funcion.titulo }}</p>
+      <p style="margin-bottom: 8px;">📅 {{ funcion.fecha }} — 🕐 {{ funcion.hora }}</p>
+      <p style="margin-bottom: 8px;">🎭 Sala: {{ funcion.sala }}</p>
+      <p style="margin-bottom: 8px;">🪑 Asientos: {{ asientos | join(', ') }}</p>
+      <p style="margin-top: 15px; font-size: 1.3rem; color: #4ade80; font-weight: bold;">
+        Total: ${{ "{:,.0f}".format(total) }}
+      </p>
+    </div>
+
+    <!-- Formulario de pago -->
+    <form action="/confirmar_compra" method="POST">
+      <input type="hidden" name="funcion_id" value="{{ funcion.id }}">
+      <input type="hidden" name="asientos" value="{{ asientos | join(',') }}">
+      <input type="hidden" name="total" value="{{ total }}">
+
+      <!-- Selector método de pago -->
+      <div style="background: #1c2541; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h2 style="color: #3b82f6; margin-bottom: 15px;">Elegí tu método de pago</h2>
+        
+        <select name="metodo_pago" id="metodo_pago" onchange="mostrarFormulario(this.value)"
+          style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white; margin-bottom: 20px;">
+          <option value="" disabled selected>Seleccioná...</option>
+          <option value="tarjeta">💳 Tarjeta</option>
+          <option value="efectivo">💵 Efectivo</option>
+          <option value="mercadoPago">🏦 Mercado Pago</option>
+        </select>
+
+        <!-- Tarjeta -->
+        <div id="form-tarjeta" style="display:none;">
+          <input type="text" name="numero_tarjeta" placeholder="Número de tarjeta"
+            style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white; margin-bottom: 10px;">
+          <input type="text" name="titular_tarjeta" placeholder="Nombre del titular"
+            style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+        </div>
+
+        <!-- Efectivo -->
+        <div id="form-efectivo" style="display:none;">
+          <p style="color: #cbd5e1; margin-bottom: 10px;">Presentate en boletería con el código de compra.</p>
+          <input type="text" name="titular_efectivo" placeholder="Tu nombre completo"
+            style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+        </div>
+
+        <!-- Transferencia / Mercado Pago -->
+        <div id="form-mercadoPago" style="display:none;">
+          <div style="background: #0b132b; padding: 15px; border-radius: 8px; text-align: center;">
+          <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" 
+            alt="Mercado Pago" style="height: 40px; margin-bottom: 15px;">
+          <p style="color: #cbd5e1; margin-bottom: 15px;">Vas a ser redirigido a Mercado Pago para completar el pago.</p>
+          <a href="https://link.mercadopago.com.ar/cineunab" target="_blank"
+            style="display: inline-block; padding: 12px 30px; background: #009ee3; color: white; border-radius: 5px; font-weight: bold; text-decoration: none;">
+            Pagar con Mercado Pago 💙 </a>
+        </div>
+    </div>
+</div>
+
+      <button type="submit"
+        style="width: 100%; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; font-weight: bold;">
+        ✅ Confirmar compra
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  function mostrarFormulario(metodo) {
+    document.getElementById('form-tarjeta').style.display = 'none';
+    document.getElementById('form-efectivo').style.display = 'none';
+    document.getElementById('form-mercadoPago').style.display = 'none';
+
+    if (metodo === 'tarjeta') document.getElementById('form-tarjeta').style.display = 'block';
+    if (metodo === 'efectivo') document.getElementById('form-efectivo').style.display = 'block';
+    if (metodo === 'mercadoPago') document.getElementById('form-mercadoPago').style.display = 'block';
+  }
+</script>
+{% endblock %}
