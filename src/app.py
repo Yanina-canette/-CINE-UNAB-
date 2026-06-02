@@ -544,6 +544,12 @@ def compra_exitosa():
     usuario = session.get("usuario", None)
     return render_template("compra_exitosa.html", usuario=usuario)  
 
+@app.route('/compra_fallida')
+def compra_fallida():
+    usuario = session.get("usuario", None)
+    return render_template("compra_fallida.html", usuario=usuario)
+
+
 
 if __name__ == '__main__':
     # Esto enciende el servidor web
