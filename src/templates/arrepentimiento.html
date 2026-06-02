@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 60px 20px; color: white; font-family: sans-serif;">
+  <div style="max-width: 700px; margin: 0 auto;">
+
+    <h1 style="font-size: 1.8rem; margin-bottom: 10px;">↩️ Botón de Arrepentimiento</h1>
+    <p style="color:#94a3b8; margin-bottom: 30px;">Ley de Defensa del Consumidor — Art. 34, Ley 24.240</p>
+
+    <div style="background:#1c2541; border-radius:12px; padding:25px; margin-bottom:30px; color:#cbd5e1; line-height:1.8;">
+      <p>De acuerdo a la legislación argentina, el consumidor tiene derecho a revocar la aceptación de una compra realizada por medios electrónicos dentro de los <strong style="color:#facc15;">10 (diez) días corridos</strong> desde la fecha de compra, sin necesidad de indicar causa y sin penalidad alguna.</p>
+      <p style="margin-top:15px;">Completá el formulario y nos comunicaremos con vos a la brevedad para gestionar la devolución.</p>
+    </div>
+
+    <!-- Formulario -->
+    <div style="background:#1c2541; border-radius:12px; padding:30px;">
+      <form action="/arrepentimiento" method="POST">
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:6px; color:#94a3b8;">Nombre completo</label>
+          <input type="text" name="nombre" required
+            style="width:100%; padding:10px; border-radius:6px; border:1px solid #2d3f6b; background:#0b132b; color:white; font-size:1rem;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:6px; color:#94a3b8;">Email</label>
+          <input type="email" name="email" required
+            style="width:100%; padding:10px; border-radius:6px; border:1px solid #2d3f6b; background:#0b132b; color:white; font-size:1rem;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:6px; color:#94a3b8;">Número de compra</label>
+          <input type="text" name="numero_compra" required
+            style="width:100%; padding:10px; border-radius:6px; border:1px solid #2d3f6b; background:#0b132b; color:white; font-size:1rem;">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:6px; color:#94a3b8;">Fecha de compra</label>
+          <input type="date" name="fecha_compra" required
+            style="width:100%; padding:10px; border-radius:6px; border:1px solid #2d3f6b; background:#0b132b; color:white; font-size:1rem;">
+        </div>
+
+        <div style="margin-bottom:25px;">
+          <label style="display:block; margin-bottom:6px; color:#94a3b8;">Motivo (opcional)</label>
+          <textarea name="motivo" rows="4"
+            style="width:100%; padding:10px; border-radius:6px; border:1px solid #2d3f6b; background:#0b132b; color:white; font-size:1rem; resize:vertical;"></textarea>
+        </div>
+
+        <button type="submit"
+          style="width:100%; padding:12px; background:#ef4444; color:white; border:none; border-radius:6px; font-size:1rem; cursor:pointer;">
+          Enviar solicitud de arrepentimiento
+        </button>
+
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

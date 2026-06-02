@@ -6,8 +6,8 @@ import os
 import requests
 from cartelera import Pelicula,Sala,Funcion,Entrada,Compra, MetodoPago
 from usuarios import Usuario,Administrador,Cliente
-
-
+from datetime import datetime, timedelta
+from flask_mail import Mail, Message
 
 
 app = Flask(__name__, template_folder="templates",
@@ -25,6 +25,15 @@ pool = pooling.MySQLConnectionPool(
     database="cine_database"
     
 )
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'cineunabproyecto@gmail.com'
+app.config['MAIL_PASSWORD'] = 'desarrollodesoftware'
+app.config['MAIL_DEFAULT_SENDER'] = ('CINE UNAB', 'cineunabproyecto@gmail.com')
+
+mail = Mail(app)
 
 
 @app.context_processor
@@ -448,7 +457,6 @@ def seleccionar_asientos(funcion_id):
     try:
         cursor = conexion.cursor(dictionary=True)
         
-        # Traemos info de la función
         cursor.execute("""
             SELECT f.id, f.fecha, f.hora, s.nombre as sala, s.capacidad,
                    p.titulo, p.api_id
@@ -459,16 +467,13 @@ def seleccionar_asientos(funcion_id):
         """, (funcion_id,))
         funcion = cursor.fetchone()
 
-        # Traemos asientos ocupados para esta función
-        cursor.execute("""
-            SELECT numero_asiento FROM asientos_funcion
-            WHERE funcion_id = %s AND ocupado = TRUE
-        """, (funcion_id,))
-        ocupados = [row['numero_asiento'] for row in cursor.fetchall()]
-
     finally:
         cursor.close()
         conexion.close()
+
+    return render_template("seleccionar_asientos.html", 
+                         usuario=usuario,
+                         funcion=funcion)
 
     return render_template("seleccionar_asientos.html", 
                          usuario=usuario,
@@ -520,7 +525,7 @@ def pagar():
 
 @app.route('/confirmar_compra', methods=['POST'])
 def confirmar_compra():
-    usuario = session.get("usuario", None)
+    usuario = session.get("usuario")
     if not usuario:
         return redirect(url_for('login'))
 
@@ -534,29 +539,64 @@ def confirmar_compra():
     conexion = get_conexion()
     try:
         cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_id = cursor.fetchone()['id']
 
-        # Traemos el id del usuario
-        cursor.execute("SELECT id, es_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
-        usuario_db = cursor.fetchone()
-        usuario_id = usuario_db['id']
-
-        # Guardamos la compra
         cursor.execute("""
             INSERT INTO compras (usuario_id, funcion_id, cantidad_entradas, precio_total)
             VALUES (%s, %s, %s, %s)
         """, (usuario_id, funcion_id, len(lista_asientos), total))
         conexion.commit()
+        compra_id = cursor.lastrowid
+        session['ultimo_compra_id'] = compra_id
 
-        # Marcamos los asientos como ocupados
-        for numero in lista_asientos:
+        for asiento_id in lista_asientos:
             cursor.execute("""
-                INSERT INTO asientos_funcion (funcion_id, numero_asiento, ocupado)
+                INSERT INTO compra_asientos (compra_id, asiento_id) VALUES (%s, %s)
+            """, (compra_id, asiento_id))
+
+            cursor.execute("""
+                INSERT INTO asientos_funcion (funcion_id, asiento_id, ocupado)
                 VALUES (%s, %s, TRUE)
                 ON DUPLICATE KEY UPDATE ocupado = TRUE
-            """, (funcion_id, numero))
-        conexion.commit()
+            """, (funcion_id, asiento_id))
 
-        flash(f"¡Compra realizada con éxito! Método: {metodo_pago}")
+            cursor.execute("""
+                DELETE FROM reservas_temporales 
+                WHERE funcion_id=%s AND asiento_id=%s
+            """, (funcion_id, asiento_id))
+
+        conexion.commit()
+        # Traemos el email del usuario
+        cursor.execute("SELECT email FROM usuarios WHERE id=%s", (usuario_id,))
+        email_usuario = cursor.fetchone()['email']
+
+        # Enviamos el mail de confirmación
+        try:
+            msg = Message(
+                subject="✅ Confirmación de compra — CINE UNAB",
+                recipients=[email_usuario]
+            )
+            msg.html = f"""
+            <div style="font-family:sans-serif; background:#0b132b; color:white; padding:40px; border-radius:12px;">
+                <h1 style="color:#4ade80;">¡Compra exitosa! 🎬</h1>
+                <p>Hola <strong>{usuario}</strong>, tu compra fue confirmada correctamente.</p>
+                <div style="background:#1c2541; padding:20px; border-radius:8px; margin:20px 0;">
+                    <p style="color:#94a3b8;">Número de compra</p>
+                    <h2 style="color:#facc15;">#{compra_id}</h2>
+                    <p style="color:#94a3b8;">Cantidad de entradas: <strong style="color:white;">{len(lista_asientos)}</strong></p>
+                    <p style="color:#94a3b8;">Total pagado: <strong style="color:#4ade80;">${total}</strong></p>
+                    <p style="color:#94a3b8;">Método de pago: <strong style="color:white;">{metodo_pago}</strong></p>
+                </div>
+                <p style="color:#94a3b8; font-size:0.9rem;">Presentá el número de compra al retirar tus entradas.</p>
+                <p style="color:#94a3b8; font-size:0.8rem; margin-top:30px;">CINE UNAB — Bartolomé Mitre 1399</p>
+            </div>
+            """
+            mail.send(msg)
+        except Exception as e:
+            print(f"Error al enviar mail: {e}")
+
+        flash(f"¡Compra exitosa! Te enviamos un mail de confirmación.")
         return redirect(url_for('compra_exitosa'))
 
     finally:
@@ -567,13 +607,155 @@ def confirmar_compra():
 @app.route('/compra_exitosa')
 def compra_exitosa():
     usuario = session.get("usuario", None)
-    return render_template("compra_exitosa.html", usuario=usuario)  
+    numero_compra = session.pop('ultimo_compra_id', None)
+    return render_template("compra_exitosa.html", usuario=usuario, numero_compra=numero_compra)
+
 
 @app.route('/compra_fallida')
 def compra_fallida():
     usuario = session.get("usuario", None)
     return render_template("compra_fallida.html", usuario=usuario)
 
+@app.route('/reservar_asiento', methods=['POST'])
+def reservar_asiento():
+    usuario = session.get("usuario")
+    if not usuario:
+        return {"error": "no_session"}, 401
+
+    funcion_id = request.json.get('funcion_id')
+    asiento_id = request.json.get('asiento_id')
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_id = cursor.fetchone()['id']
+
+        # Limpiamos reservas expiradas
+        cursor.execute("DELETE FROM reservas_temporales WHERE expira_en < NOW()")
+        conexion.commit()
+
+        # Verificamos que no esté ocupado
+        cursor.execute("""
+            SELECT id FROM asientos_funcion 
+            WHERE funcion_id=%s AND asiento_id=%s AND ocupado=TRUE
+        """, (funcion_id, asiento_id))
+        if cursor.fetchone():
+            return {"error": "ocupado"}, 409
+
+        # Verificamos que no esté reservado por otro
+        cursor.execute("""
+            SELECT id FROM reservas_temporales 
+            WHERE funcion_id=%s AND asiento_id=%s
+        """, (funcion_id, asiento_id))
+        if cursor.fetchone():
+            return {"error": "reservado"}, 409
+
+        # Insertamos reserva temporal (10 minutos)
+        expira = datetime.now() + timedelta(minutes=10)
+        cursor.execute("""
+            INSERT INTO reservas_temporales (usuario_id, funcion_id, asiento_id, expira_en)
+            VALUES (%s, %s, %s, %s)
+        """, (usuario_id, funcion_id, asiento_id, expira))
+        conexion.commit()
+
+        return {"ok": True, "expira_en": expira.isoformat()}
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
+@app.route('/liberar_asiento', methods=['POST'])
+def liberar_asiento():
+    usuario = session.get("usuario")
+    if not usuario:
+        return {"error": "no_session"}, 401
+
+    funcion_id = request.json.get('funcion_id')
+    asiento_id = request.json.get('asiento_id')
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_id = cursor.fetchone()['id']
+
+        cursor.execute("""
+            DELETE FROM reservas_temporales 
+            WHERE usuario_id=%s AND funcion_id=%s AND asiento_id=%s
+        """, (usuario_id, funcion_id, asiento_id))
+        conexion.commit()
+        return {"ok": True}
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
+@app.route('/estado_asientos/<int:funcion_id>')
+def estado_asientos(funcion_id):
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+
+        # Limpiamos expirados
+        cursor.execute("DELETE FROM reservas_temporales WHERE expira_en < NOW()")
+        conexion.commit()
+
+        # Todos los asientos de la sala
+        cursor.execute("""
+            SELECT a.id, a.fila, a.numero FROM asientos a
+            JOIN funciones f ON f.sala_id = a.sala_id
+            WHERE f.id = %s
+            ORDER BY a.fila, a.numero
+        """, (funcion_id,))
+        todos = cursor.fetchall()
+
+        # Ocupados definitivamente
+        cursor.execute("""
+            SELECT asiento_id FROM asientos_funcion 
+            WHERE funcion_id=%s AND ocupado=TRUE
+        """, (funcion_id,))
+        ocupados = {r['asiento_id'] for r in cursor.fetchall()}
+
+        # Reservados temporalmente
+        cursor.execute("""
+            SELECT asiento_id FROM reservas_temporales WHERE funcion_id=%s
+        """, (funcion_id,))
+        reservados = {r['asiento_id'] for r in cursor.fetchall()}
+
+        for a in todos:
+            if a['id'] in ocupados:
+                a['estado'] = 'ocupado'
+            elif a['id'] in reservados:
+                a['estado'] = 'reservado'
+            else:
+                a['estado'] = 'libre'
+
+        return {"asientos": todos}
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+@app.route('/precios')
+def precios():
+    usuario = session.get("usuario", None)
+    return render_template("precios.html", usuario=usuario)
+
+@app.route('/terminos')
+def terminos():
+    usuario = session.get("usuario", None)
+    return render_template("terminos.html", usuario=usuario)
+
+@app.route('/arrepentimiento', methods=['GET', 'POST'])
+def arrepentimiento():
+    usuario = session.get("usuario", None)
+    if request.method == 'POST':
+        flash("Tu solicitud fue recibida. Nos comunicaremos con vos dentro de las 72 horas hábiles.")
+        return redirect(url_for('arrepentimiento'))
+    return render_template("arrepentimiento.html", usuario=usuario)
 
 
 if __name__ == '__main__':

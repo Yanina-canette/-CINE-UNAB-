@@ -22,7 +22,7 @@
     </div>
     <nav>
         <a href="{{url_for('peliculas')}}">Películas</a>
-        <a href="#">Precio entradas</a>
+        <a href="/precios">Precio entradas</a>
     </nav>
     {% if usuario %}
     <a href="{{ url_for('perfil') }}" style="color:white; font-weight:bold;">Hola, {{ usuario }}</a>
@@ -56,12 +56,12 @@
 
     <div class="footer-col">
       <h4>NOSOTROS</h4>
-      <a href="#">Términos y Condiciones</a>
+      <a href="/terminos">Términos y Condiciones</a>
     </div>
 
     <div class="footer-col">
       <h4>CONTÁCTANOS</h4>
-      <a href="#" class="footer-link-red">Botón de arrepentimiento</a>
+      <a href="/arrepentimiento" class="footer-link-red">Botón de arrepentimiento</a>
     </div>
 
     <div class="footer-col footer-social">
