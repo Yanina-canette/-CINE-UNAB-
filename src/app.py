@@ -8,6 +8,8 @@ from cartelera import Pelicula,Sala,Funcion,Entrada,Compra, MetodoPago
 from usuarios import Usuario,Administrador,Cliente
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+
 
 
 app = Flask(__name__, template_folder="templates",
@@ -21,7 +23,7 @@ pool = pooling.MySQLConnectionPool(
     pool_size=5,
     host="localhost",
     user="root",
-    password="mysql0610",
+    password="",
     database="cine_database"
     
 )
@@ -30,7 +32,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'cineunabproyecto@gmail.com'
-app.config['MAIL_PASSWORD'] = 'desarrollodesoftware'
+app.config['MAIL_PASSWORD'] = 'thtyjdkawkorzktb'
 app.config['MAIL_DEFAULT_SENDER'] = ('CINE UNAB', 'cineunabproyecto@gmail.com')
 
 mail = Mail(app)
@@ -52,6 +54,7 @@ def inject_es_admin():
         except:
             pass
     return dict(es_admin=es_admin)
+
 
 def get_conexion():
     return pool.get_connection()
@@ -124,6 +127,7 @@ def formulario():
 
     return render_template('formulario.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -164,41 +168,88 @@ def login():
         
     return render_template('login.html')
 
+
 @app.route('/recuperar', methods=['GET', 'POST'])
 def recuperar():
     if request.method == 'POST':
         email = request.form['email']
-        nueva = request.form['nueva']
-        confirmar = request.form['confirmar']
-
-        if nueva != confirmar:
-            flash("Las contraseñas no coinciden")
-            return redirect(url_for('recuperar'))
 
         conexion = get_conexion()
         try:
             cursor = conexion.cursor()
             cursor.execute("SELECT * FROM usuarios WHERE email=%s", (email,))
             usuario = cursor.fetchone()
+        finally:
+            cursor.close()
+            conexion.close()
 
-            if not usuario:
-                flash("Email no registrado")
-                return redirect(url_for('recuperar'))
+        if usuario:
+            # Generar token seguro (expira en 30 min)
+            s = URLSafeTimedSerializer(app.secret_key)
+            token = s.dumps(email, salt='recuperar-contraseña')
 
-            nueva_hash = generate_password_hash(nueva)
+            link = url_for('nueva_contraseña', token=token, _external=True)
+
+            try:
+                msg = Message(
+                    subject="🔐 Recuperar contraseña — CINE UNAB",
+                    recipients=[email]
+                )
+                msg.html = render_template('email_recuperar.html', link=link)
+                
+                mail.send(msg)
+            except Exception as e:
+                print(f"Error al enviar mail: {e}")
+
+        # Siempre mostramos el mismo mensaje (por seguridad)
+        flash("Si el email está registrado, te enviamos un link para recuperar tu contraseña.")
+        return redirect(url_for('recuperar'))
+
+    return render_template('recuperar.html')
+
+
+@app.route('/nueva_contraseña/<token>', methods=['GET', 'POST'])
+def nueva_contraseña(token):
+    s = URLSafeTimedSerializer(app.secret_key)
+    try:
+        email = s.loads(token, salt='recuperar-contraseña', max_age=1800)  # 30 min
+    except SignatureExpired:
+        flash("El link expiró. Solicitá uno nuevo.")
+        return redirect(url_for('recuperar'))
+    except BadSignature:
+        flash("El link no es válido.")
+        return redirect(url_for('recuperar'))
+
+    if request.method == 'POST':
+        nueva = request.form['nueva']
+        confirmar = request.form['confirmar']
+
+        if nueva != confirmar:
+            flash("Las contraseñas no coinciden")
+            return redirect(url_for('nueva_contraseña', token=token))
+
+        if len(nueva) < 6:
+            flash("La contraseña debe tener al menos 6 caracteres")
+            return redirect(url_for('nueva_contraseña', token=token))
+
+        nueva_hash = generate_password_hash(nueva)
+        conexion = get_conexion()
+        try:
+            cursor = conexion.cursor()
             cursor.execute(
                 "UPDATE usuarios SET password_hash=%s WHERE email=%s",
                 (nueva_hash, email)
             )
             conexion.commit()
-            flash("Contraseña actualizada correctamente")
-            return redirect(url_for('login'))
-
         finally:
             cursor.close()
             conexion.close()
 
-    return render_template('recuperar.html')
+        flash("✅ Contraseña actualizada correctamente")
+        return redirect(url_for('login'))
+
+    return render_template('nueva_contraseña.html', token=token)
+
 
 @app.route('/peliculas')
 def peliculas():
@@ -218,6 +269,7 @@ def peliculas():
         lista_peliculas = []
 
     return render_template("peliculas.html", usuario=usuario, peliculas=lista_peliculas)
+
 
 @app.route('/pelicula/<int:api_id>')
 def detalle_pelicula(api_id):
@@ -241,19 +293,20 @@ def detalle_pelicula(api_id):
     try:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute("""
-            SELECT f.id, f.fecha, f.hora, s.nombre as sala, s.capacidad
+            SELECT f.id, f.fecha, f.hora, s.nombre as sala, s.capacidad, s.tipo, s.precio as precio_sala
             FROM funciones f
             JOIN salas s ON f.sala_id = s.id
             JOIN peliculas p ON f.pelicula_id = p.id
             WHERE p.api_id = %s AND f.fecha >= CURDATE()
             ORDER BY f.fecha, f.hora
-        """, (api_id,))
+            """, (api_id,))
         funciones = cursor.fetchall()
     finally:
         cursor.close()
         conexion.close()
 
     return render_template("detalle_pelicula.html", usuario=usuario, pelicula=pelicula, funciones=funciones)
+
 
 @app.route('/admin')
 def admin():
@@ -280,6 +333,7 @@ def admin():
     
     return render_template("admin.html", usuario=usuario)
 
+
 @app.route('/admin/salas', methods=['GET', 'POST'])
 def admin_salas():
     usuario = session.get("usuario", None)
@@ -293,7 +347,11 @@ def admin_salas():
         if request.method == 'POST':
             nombre = request.form['nombre']
             capacidad = request.form['capacidad']
-            cursor.execute("INSERT INTO salas (nombre, capacidad) VALUES (%s, %s)", (nombre, capacidad))
+            tipo = request.form['tipo']
+            precio = request.form['precio']
+            cursor.execute("INSERT INTO salas (nombre, capacidad, tipo, precio) VALUES (%s, %s, %s, %s)",
+        (nombre, capacidad, tipo, precio)
+    )
             conexion.commit()
             flash("Sala creada correctamente")
 
@@ -305,6 +363,52 @@ def admin_salas():
         conexion.close()
 
     return render_template("admin_salas.html", usuario=usuario, salas=salas)
+
+
+@app.route('/admin/salas/<int:id>/editar', methods=['POST'])
+def editar_sala(id):
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
+    
+    tipo = request.form['tipo']
+    precio = request.form['precio']
+    
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(
+            "UPDATE salas SET tipo=%s, precio=%s WHERE id=%s",
+            (tipo, precio, id)
+        )
+        conexion.commit()
+        flash("Sala actualizada correctamente")
+    finally:
+        cursor.close()
+        conexion.close()
+    
+    return redirect(url_for('admin_salas'))
+
+
+@app.route('/admin/salas/<int:id>/eliminar', methods=['POST'])
+def eliminar_sala(id):
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM asientos WHERE sala_id=%s", (id,))
+        cursor.execute("DELETE FROM salas WHERE id=%s", (id,))
+        conexion.commit()
+        flash("Sala eliminada correctamente")
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return redirect(url_for('admin_salas'))
+
 
 @app.route('/admin/funciones', methods=['GET', 'POST'])
 def admin_funciones():
@@ -320,7 +424,7 @@ def admin_funciones():
             api_id = request.form['api_id']
             titulo = request.form['titulo']
             sala_id = request.form['sala_id']
-            fecha = request.form['fecha']
+            fechas = request.form.get('fechas','')
             hora = request.form['hora']
 
             # Verificamos si la pelicula ya existe en la DB
@@ -331,19 +435,26 @@ def admin_funciones():
                 # La guardamos en la DB
                 cursor.execute("""
                     INSERT INTO peliculas (api_id, titulo, descripcion, genero, duracion_minutos, clasificacion, precio_base)
-                    VALUES (%s, %s, 'N/A', 'N/A', 0, 'N/A', 1500)
+                    VALUES (%s, %s, 'N/A', 'N/A', 0, 'N/A', 0)
                 """, (api_id, titulo))
                 conexion.commit()
                 pelicula_id = cursor.lastrowid
             else:
                 pelicula_id = pelicula['id']
 
-            cursor.execute("""
-                INSERT INTO funciones (pelicula_id, sala_id, fecha, hora)
-                VALUES (%s, %s, %s, %s)
-            """, (pelicula_id, sala_id, fecha, hora))
+            lista_fechas = [f.strip() for f in fechas.split(',') if f.strip()]
+
+            if not lista_fechas:
+                flash("Seleccioná al menos un día en el calendario")
+                return redirect(url_for('admin_funciones'))
+            
+            for fecha in lista_fechas:
+                cursor.execute("""
+                    INSERT INTO funciones (pelicula_id, sala_id, fecha, hora)
+                    VALUES (%s, %s, %s, %s)
+                    """, (pelicula_id, sala_id, fecha, hora))
             conexion.commit()
-            flash("Función creada correctamente")
+            flash(f"Se crearon {len(lista_fechas)} función(es) correctamente")
 
         cursor.execute("SELECT * FROM salas")
         salas = cursor.fetchall()
@@ -363,6 +474,52 @@ def admin_funciones():
 
     return render_template("admin_funciones.html", usuario=usuario, salas=salas, funciones=funciones)
 
+
+@app.route('/admin/funciones/<int:id>/editar', methods=['POST'])
+def editar_funcion(id):
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
+
+    sala_id = request.form['sala_id']
+    fecha = request.form['fecha']
+    hora = request.form['hora']
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(
+            "UPDATE funciones SET sala_id=%s, fecha=%s, hora=%s WHERE id=%s",
+            (sala_id, fecha, hora, id)
+        )
+        conexion.commit()
+        flash("Función actualizada correctamente")
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return redirect(url_for('admin_funciones'))
+
+
+@app.route('/admin/funciones/<int:id>/eliminar', methods=['POST'])
+def eliminar_funcion(id):
+    usuario = session.get("usuario", None)
+    if not usuario:
+        return redirect(url_for('login'))
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM reservas_temporales WHERE funcion_id=%s", (id,))
+        cursor.execute("DELETE FROM asientos_funcion WHERE funcion_id=%s", (id,))
+        cursor.execute("DELETE FROM funciones WHERE id=%s", (id,))
+        conexion.commit()
+        flash("Función eliminada correctamente")
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return redirect(url_for('admin_funciones'))
 
 
 @app.route('/perfil')
@@ -446,6 +603,7 @@ def rechazar_estudiante(id):
         conexion.close()
     return redirect(url_for('admin_estudiantes'))
 
+
 @app.route('/comprar/<int:funcion_id>')
 def seleccionar_asientos(funcion_id):
     usuario = session.get("usuario", None)
@@ -459,7 +617,7 @@ def seleccionar_asientos(funcion_id):
         
         cursor.execute("""
             SELECT f.id, f.fecha, f.hora, s.nombre as sala, s.capacidad,
-                   p.titulo, p.api_id
+                   s.precio as precio_sala, p.titulo, p.api_id
             FROM funciones f
             JOIN salas s ON f.sala_id = s.id
             JOIN peliculas p ON f.pelicula_id = p.id
@@ -475,146 +633,7 @@ def seleccionar_asientos(funcion_id):
                          usuario=usuario,
                          funcion=funcion)
 
-    return render_template("seleccionar_asientos.html", 
-                         usuario=usuario,
-                         funcion=funcion, 
-                         ocupados=ocupados)
 
-@app.route('/pagar', methods=['GET', 'POST'])
-def pagar():
-    usuario = session.get("usuario", None)
-    if not usuario:
-        flash("Tenés que iniciar sesión para comprar entradas")
-        return redirect(url_for('login'))
-
-    funcion_id = request.form.get('funcion_id')
-    asientos = request.form.get('asientos')
-
-    conexion = get_conexion()
-    try:
-        cursor = conexion.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT f.id, f.fecha, f.hora, s.nombre as sala,
-                   p.titulo, p.precio_base
-            FROM funciones f
-            JOIN salas s ON f.sala_id = s.id
-            JOIN peliculas p ON f.pelicula_id = p.id
-            WHERE f.id = %s
-        """, (funcion_id,))
-        funcion = cursor.fetchone()
-
-        cursor.execute("SELECT es_estudiante, verificado_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
-        usuario_db = cursor.fetchone()
-        es_estudiante = usuario_db and usuario_db['es_estudiante'] and usuario_db['verificado_estudiante'] == 'aprobado'
-
-    finally:
-        cursor.close()
-        conexion.close()
-
-    lista_asientos = [int(a) for a in asientos.split(',')]
-    precio = 1500
-    total = len(lista_asientos) * precio
-    if es_estudiante:
-        total = total / 2
-
-    return render_template("pagar.html",
-                         usuario=usuario,
-                         funcion=funcion,
-                         asientos=lista_asientos,
-                         total=total)
-
-@app.route('/confirmar_compra', methods=['POST'])
-def confirmar_compra():
-    usuario = session.get("usuario")
-    if not usuario:
-        return redirect(url_for('login'))
-
-    funcion_id = request.form.get('funcion_id')
-    asientos = request.form.get('asientos')
-    total = request.form.get('total')
-    metodo_pago = request.form.get('metodo_pago')
-
-    lista_asientos = [int(a) for a in asientos.split(',')]
-
-    conexion = get_conexion()
-    try:
-        cursor = conexion.cursor(dictionary=True)
-        cursor.execute("SELECT id FROM usuarios WHERE nombre=%s", (usuario,))
-        usuario_id = cursor.fetchone()['id']
-
-        cursor.execute("""
-            INSERT INTO compras (usuario_id, funcion_id, cantidad_entradas, precio_total)
-            VALUES (%s, %s, %s, %s)
-        """, (usuario_id, funcion_id, len(lista_asientos), total))
-        conexion.commit()
-        compra_id = cursor.lastrowid
-        session['ultimo_compra_id'] = compra_id
-
-        for asiento_id in lista_asientos:
-            cursor.execute("""
-                INSERT INTO compra_asientos (compra_id, asiento_id) VALUES (%s, %s)
-            """, (compra_id, asiento_id))
-
-            cursor.execute("""
-                INSERT INTO asientos_funcion (funcion_id, asiento_id, ocupado)
-                VALUES (%s, %s, TRUE)
-                ON DUPLICATE KEY UPDATE ocupado = TRUE
-            """, (funcion_id, asiento_id))
-
-            cursor.execute("""
-                DELETE FROM reservas_temporales 
-                WHERE funcion_id=%s AND asiento_id=%s
-            """, (funcion_id, asiento_id))
-
-        conexion.commit()
-        # Traemos el email del usuario
-        cursor.execute("SELECT email FROM usuarios WHERE id=%s", (usuario_id,))
-        email_usuario = cursor.fetchone()['email']
-
-        # Enviamos el mail de confirmación
-        try:
-            msg = Message(
-                subject="✅ Confirmación de compra — CINE UNAB",
-                recipients=[email_usuario]
-            )
-            msg.html = f"""
-            <div style="font-family:sans-serif; background:#0b132b; color:white; padding:40px; border-radius:12px;">
-                <h1 style="color:#4ade80;">¡Compra exitosa! 🎬</h1>
-                <p>Hola <strong>{usuario}</strong>, tu compra fue confirmada correctamente.</p>
-                <div style="background:#1c2541; padding:20px; border-radius:8px; margin:20px 0;">
-                    <p style="color:#94a3b8;">Número de compra</p>
-                    <h2 style="color:#facc15;">#{compra_id}</h2>
-                    <p style="color:#94a3b8;">Cantidad de entradas: <strong style="color:white;">{len(lista_asientos)}</strong></p>
-                    <p style="color:#94a3b8;">Total pagado: <strong style="color:#4ade80;">${total}</strong></p>
-                    <p style="color:#94a3b8;">Método de pago: <strong style="color:white;">{metodo_pago}</strong></p>
-                </div>
-                <p style="color:#94a3b8; font-size:0.9rem;">Presentá el número de compra al retirar tus entradas.</p>
-                <p style="color:#94a3b8; font-size:0.8rem; margin-top:30px;">CINE UNAB — Bartolomé Mitre 1399</p>
-            </div>
-            """
-            mail.send(msg)
-        except Exception as e:
-            print(f"Error al enviar mail: {e}")
-
-        flash(f"¡Compra exitosa! Te enviamos un mail de confirmación.")
-        return redirect(url_for('compra_exitosa'))
-
-    finally:
-        cursor.close()
-        conexion.close()
-
-
-@app.route('/compra_exitosa')
-def compra_exitosa():
-    usuario = session.get("usuario", None)
-    numero_compra = session.pop('ultimo_compra_id', None)
-    return render_template("compra_exitosa.html", usuario=usuario, numero_compra=numero_compra)
-
-
-@app.route('/compra_fallida')
-def compra_fallida():
-    usuario = session.get("usuario", None)
-    return render_template("compra_fallida.html", usuario=usuario)
 
 @app.route('/reservar_asiento', methods=['POST'])
 def reservar_asiento():
@@ -739,15 +758,156 @@ def estado_asientos(funcion_id):
         cursor.close()
         conexion.close()
 
+
+@app.route('/pagar', methods=['GET', 'POST'])
+def pagar():
+    usuario = session.get("usuario", None)
+    if not usuario:
+        flash("Tenés que iniciar sesión para comprar entradas")
+        return redirect(url_for('login'))
+
+    funcion_id = request.form.get('funcion_id')
+    asientos = request.form.get('asientos')
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT f.id, f.fecha, f.hora, s.nombre as sala,
+                   p.titulo, p.precio_base , s.precio as precio_sala
+            FROM funciones f
+            JOIN salas s ON f.sala_id = s.id
+            JOIN peliculas p ON f.pelicula_id = p.id
+            WHERE f.id = %s
+        """, (funcion_id,))
+        funcion = cursor.fetchone()
+
+        cursor.execute("SELECT es_estudiante, verificado_estudiante FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_db = cursor.fetchone()
+        es_estudiante = usuario_db and usuario_db['es_estudiante'] and usuario_db['verificado_estudiante'] == 'aprobado'
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    lista_asientos = [int(a) for a in asientos.split(',')]
+    precio = funcion['precio_sala']
+    total = len(lista_asientos) * precio
+    if es_estudiante:
+        total = total / 2
+
+    return render_template("pagar.html",
+                         usuario=usuario,
+                         funcion=funcion,
+                         asientos=lista_asientos,
+                         total=total)
+
+
+@app.route('/confirmar_compra', methods=['POST'])
+def confirmar_compra():
+    usuario = session.get("usuario")
+    if not usuario:
+        return redirect(url_for('login'))
+
+    funcion_id = request.form.get('funcion_id')
+    asientos = request.form.get('asientos')
+    total = request.form.get('total')
+    metodo_pago = request.form.get('metodo_pago')
+
+    lista_asientos = [int(a) for a in asientos.split(',')]
+
+    conexion = get_conexion()
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT id FROM usuarios WHERE nombre=%s", (usuario,))
+        usuario_id = cursor.fetchone()['id']
+
+        cursor.execute("""
+            INSERT INTO compras (usuario_id, funcion_id, cantidad_entradas, precio_total)
+            VALUES (%s, %s, %s, %s)
+        """, (usuario_id, funcion_id, len(lista_asientos), total))
+        conexion.commit()
+        compra_id = cursor.lastrowid
+        session['ultimo_compra_id'] = compra_id
+
+        for asiento_id in lista_asientos:
+            cursor.execute("""
+                INSERT INTO compra_asientos (compra_id, asiento_id) VALUES (%s, %s)
+            """, (compra_id, asiento_id))
+
+            cursor.execute("""
+                INSERT INTO asientos_funcion (funcion_id, asiento_id, ocupado)
+                VALUES (%s, %s, TRUE)
+                ON DUPLICATE KEY UPDATE ocupado = TRUE
+            """, (funcion_id, asiento_id))
+
+            cursor.execute("""
+                DELETE FROM reservas_temporales 
+                WHERE funcion_id=%s AND asiento_id=%s
+            """, (funcion_id, asiento_id))
+
+        conexion.commit()
+        # Traemos el email del usuario
+        cursor.execute("SELECT email FROM usuarios WHERE id=%s", (usuario_id,))
+        email_usuario = cursor.fetchone()['email']
+
+        # Enviamos el mail de confirmación
+        try:
+            msg = Message(
+                subject="✅ Confirmación de compra — CINE UNAB",
+                recipients=[email_usuario]
+            )
+            msg.html = f"""
+            <div style="font-family:sans-serif; background:#0b132b; color:white; padding:40px; border-radius:12px;">
+                <h1 style="color:#4ade80;">¡Compra exitosa! 🎬</h1>
+                <p>Hola <strong>{usuario}</strong>, tu compra fue confirmada correctamente.</p>
+                <div style="background:#1c2541; padding:20px; border-radius:8px; margin:20px 0;">
+                    <p style="color:#94a3b8;">Número de compra</p>
+                    <h2 style="color:#facc15;">#{compra_id}</h2>
+                    <p style="color:#94a3b8;">Cantidad de entradas: <strong style="color:white;">{len(lista_asientos)}</strong></p>
+                    <p style="color:#94a3b8;">Total pagado: <strong style="color:#4ade80;">${total}</strong></p>
+                    <p style="color:#94a3b8;">Método de pago: <strong style="color:white;">{metodo_pago}</strong></p>
+                </div>
+                <p style="color:#94a3b8; font-size:0.9rem;">Presentá el número de compra al retirar tus entradas.</p>
+                <p style="color:#94a3b8; font-size:0.8rem; margin-top:30px;">CINE UNAB — Bartolomé Mitre 1399</p>
+            </div>
+            """
+            mail.send(msg)
+        except Exception as e:
+            print(f"Error al enviar mail: {e}")
+
+        flash(f"¡Compra exitosa! Te enviamos un mail de confirmación.")
+        return redirect(url_for('compra_exitosa'))
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
+@app.route('/compra_exitosa')
+def compra_exitosa():
+    usuario = session.get("usuario", None)
+    numero_compra = session.pop('ultimo_compra_id', None)
+    return render_template("compra_exitosa.html", usuario=usuario, numero_compra=numero_compra)
+
+
+@app.route('/compra_fallida')
+def compra_fallida():
+    usuario = session.get("usuario", None)
+    return render_template("compra_fallida.html", usuario=usuario)
+
+
 @app.route('/precios')
 def precios():
     usuario = session.get("usuario", None)
     return render_template("precios.html", usuario=usuario)
 
+
 @app.route('/terminos')
 def terminos():
     usuario = session.get("usuario", None)
     return render_template("terminos.html", usuario=usuario)
+
 
 @app.route('/arrepentimiento', methods=['GET', 'POST'])
 def arrepentimiento():

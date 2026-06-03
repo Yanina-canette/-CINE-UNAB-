@@ -26,22 +26,173 @@
 
       <!-- Funciones -->
       <h2 style="font-size: 1.4rem; margin-bottom: 15px;">Funciones disponibles</h2>
+
       {% if funciones %}
-        {% for funcion in funciones %}
-          <div style="background: #1c2541; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-            <p>📅 {{ funcion.fecha }} — 🕐 {{ funcion.hora }}</p>
-            <p>🎭 Sala: {{ funcion.sala }} ({{ funcion.capacidad }} asientos)</p>
-            <a href="/comprar/{{ funcion.id }}" 
-   style="display: inline-block; margin-top: 10px; padding: 8px 20px; background: #3b82f6; color: white; border-radius: 5px; font-weight: bold;">
-    🎟 Comprar entradas</a>
+
+        <!-- Selector de fecha estilo dropdown -->
+        <div style="margin-bottom: 20px; position: relative;" id="selector-container">
+          
+          <!-- Botón que abre el calendario -->
+          <div onclick="toggleCalendario()" 
+               id="btn-selector"
+               style="background: #1c2541; border: 1px solid #3b82f6; border-radius: 8px; 
+                      padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; 
+                      align-items: center; max-width: 380px;">
+            <span id="texto-fecha" style="color: #cbd5e1;">📅 Seleccioná un día</span>
+            <span id="flecha" style="color: #3b82f6; font-size: 1.2rem;">▼</span>
           </div>
-        {% endfor %}
+
+          <!-- Calendario desplegable -->
+          <div id="calendario-dropdown" 
+               style="display: none; position: absolute; z-index: 100; top: 50px; left: 0;
+                      background: #1c2541; border: 1px solid #3b82f6; border-radius: 10px; 
+                      padding: 20px; max-width: 380px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+            
+            <!-- Cabecera mes/año -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <button onclick="cambiarMes(-1); event.stopPropagation();" 
+                      style="background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer;">‹</button>
+              <span id="mes-anio" style="font-weight: bold; font-size: 1rem;"></span>
+              <button onclick="cambiarMes(1); event.stopPropagation();" 
+                      style="background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer;">›</button>
+            </div>
+
+            <!-- Días de la semana -->
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 8px;">
+              {% for dia in ['Lu','Ma','Mi','Ju','Vi','Sa','Do'] %}
+                <div style="color: #94a3b8; font-size: 0.8rem; padding: 4px;">{{ dia }}</div>
+              {% endfor %}
+            </div>
+
+            <!-- Días del mes -->
+            <div id="grilla-dias" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 4px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Horarios del día seleccionado -->
+        <div id="horarios-container" style="display: none;">
+          <h3 id="titulo-fecha" style="color: #cbd5e1; margin-bottom: 12px; font-size: 1rem;"></h3>
+          <div id="lista-horarios"></div>
+        </div>
+
+        <p id="sin-funciones" style="color: #94a3b8; display: none;">No hay funciones para este día.</p>
+
       {% else %}
         <p style="color: #94a3b8;">No hay funciones disponibles para esta película.</p>
       {% endif %}
 
     </div>
   </div>
-
 </div>
+
+<script>
+  const funciones = [
+    {% for f in funciones %}
+    { fecha: "{{ f.fecha }}", hora: "{{ f.hora }}", sala: "{{ f.sala }}", tipo: "{{ f.tipo }}", id: {{ f.id }} },
+    {% endfor %}
+  ];
+
+  const fechasConFunciones = [...new Set(funciones.map(f => f.fecha))];
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let mesActual = new Date();
+  mesActual.setDate(1);
+
+  if (fechasConFunciones.length > 0) {
+    const [a, m] = fechasConFunciones[0].split('-').map(Number);
+    mesActual = new Date(a, m - 1, 1);
+  }
+
+  function toggleCalendario() {
+    const cal = document.getElementById('calendario-dropdown');
+    const flecha = document.getElementById('flecha');
+    if (cal.style.display === 'none') {
+      cal.style.display = 'block';
+      flecha.textContent = '▲';
+      renderCalendario();
+    } else {
+      cal.style.display = 'none';
+      flecha.textContent = '▼';
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    const container = document.getElementById('selector-container');
+    if (!container.contains(e.target)) {
+      document.getElementById('calendario-dropdown').style.display = 'none';
+      document.getElementById('flecha').textContent = '▼';
+    }
+  });
+
+  function renderCalendario() {
+    const anio = mesActual.getFullYear();
+    const mes = mesActual.getMonth();
+    document.getElementById('mes-anio').textContent = `${MESES[mes]} ${anio}`;
+
+    const grilla = document.getElementById('grilla-dias');
+    grilla.innerHTML = '';
+
+    let offset = new Date(anio, mes, 1).getDay() - 1;
+    if (offset < 0) offset = 6;
+
+    for (let i = 0; i < offset; i++) grilla.appendChild(document.createElement('div'));
+
+    const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+    for (let d = 1; d <= diasEnMes; d++) {
+      const fechaStr = `${anio}-${String(mes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const tieneFuncion = fechasConFunciones.includes(fechaStr);
+
+      const div = document.createElement('div');
+      div.textContent = d;
+      div.dataset.fecha = fechaStr;
+      div.style.cssText = `padding: 8px 4px; border-radius: 6px; font-size: 0.9rem;
+        ${tieneFuncion ? 'background:#3b82f6; cursor:pointer; font-weight:bold;' : 'color:#4a5568;'}`;
+
+      if (tieneFuncion) {
+        div.onclick = (e) => { e.stopPropagation(); seleccionarFecha(fechaStr, d, mes, anio); };
+      }
+      grilla.appendChild(div);
+    }
+  }
+
+  function cambiarMes(dir) {
+    mesActual.setMonth(mesActual.getMonth() + dir);
+    renderCalendario();
+  }
+
+  function seleccionarFecha(fechaStr, dia, mes, anio) {
+    document.getElementById('calendario-dropdown').style.display = 'none';
+    document.getElementById('flecha').textContent = '▼';
+
+    document.getElementById('texto-fecha').textContent = 
+      `📅 ${String(dia).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}/${anio}`;
+    document.getElementById('texto-fecha').style.color = 'white';
+
+    const funcionesDelDia = funciones.filter(f => f.fecha === fechaStr);
+    const lista = document.getElementById('lista-horarios');
+    lista.innerHTML = '';
+
+    if (funcionesDelDia.length > 0) {
+      document.getElementById('horarios-container').style.display = 'block';
+      document.getElementById('sin-funciones').style.display = 'none';
+      document.getElementById('titulo-fecha').textContent = 
+        `📅 ${String(dia).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}/${anio}`;
+
+      funcionesDelDia.forEach(f => {
+        lista.innerHTML += `
+          <div style="background:#1c2541; padding:15px; border-radius:8px; margin-bottom:10px;">
+            <p style="color:#cbd5e1; margin-bottom:5px;">🎭 ${f.sala} — ${f.tipo}</p>
+            <p style="color:#facc15; font-size:1.2rem; font-weight:bold; margin-bottom:10px;">🕐 ${f.hora.substring(0,5)}</p>
+            <a href="/comprar/${f.id}" style="display:inline-block; padding:8px 20px; background:#3b82f6; 
+               color:white; border-radius:5px; font-weight:bold; text-decoration:none;">
+              🎟 Comprar entradas
+            </a>
+          </div>`;
+      });
+    } else {
+      document.getElementById('horarios-container').style.display = 'none';
+      document.getElementById('sin-funciones').style.display = 'block';
+    }
+  }
+</script>
 {% endblock %}

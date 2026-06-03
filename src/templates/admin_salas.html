@@ -21,12 +21,25 @@
             <form action="/admin/salas" method="POST">
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Nombre</label>
-                    <input type="text" name="nombre" placeholder="Ej: Sala 1" required
+                    <input type="text" name="nombre" placeholder="Ej: Sala 2D" required
                         style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
                 </div>
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
                     <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Capacidad</label>
                     <input type="number" name="capacidad" placeholder="Ej: 50" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Tipo de sala</label>
+                    <select name="tipo" required
+                        style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                        <option value="2D">2D</option>
+                        <option value="3D">3D</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Precio entrada ($)</label>
+                    <input type="number" name="precio" placeholder="Ej: 13000" required
                         style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
                 </div>
                 <button type="submit"
@@ -40,10 +53,39 @@
         <h2 style="margin-bottom: 15px;">Salas existentes</h2>
         {% if salas %}
             {% for sala in salas %}
-                <div style="background: #1c2541; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                    <span>{{ sala.nombre }}</span>
-                    <span style="color: #cbd5e1;">{{ sala.capacidad }} asientos</span>
+            <div style="background: #1c2541; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <span style="font-weight: bold; font-size: 1.1rem;">{{ sala.nombre }}</span>
+                        <span style="margin-left: 10px; background: #3b82f6; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;">{{ sala.tipo }}</span>
+                    </div>
+                    <div style="color: #cbd5e1; font-size: 0.9rem;">
+                        {{ sala.capacidad }} asientos · 
+                        <span style="color: #4ade80; font-weight: bold;">${{ "{:,}".format(sala.precio).replace(",", ".") }}</span>
+                    </div>
                 </div>
+                <form action="/admin/salas/{{ sala.id }}/editar" method="POST" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select name="tipo"
+                        style="padding: 7px 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                        <option value="2D" {% if sala.tipo == '2D' %}selected{% endif %}>2D</option>
+                        <option value="3D" {% if sala.tipo == '3D' %}selected{% endif %}>3D</option>
+                    </select>
+                    <input type="number" name="precio" value="{{ sala.precio }}" placeholder="Nuevo precio"
+                        style="flex: 1; min-width: 120px; padding: 7px 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                    <button type="submit"
+                        style="padding: 7px 18px; background: #f59e0b; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        Actualizar
+                    </button>
+                </form>
+                <form action="/admin/salas/{{ sala.id }}/eliminar" method="POST" 
+                      onsubmit="return confirm('¿Seguro que querés eliminar {{ sala.nombre }}?')"
+                      style="margin-top: 10px;">
+                    <button type="submit"
+                        style="padding: 7px 18px; background: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                        🗑 Eliminar sala
+                    </button>
+                </form>
+            </div>
             {% endfor %}
         {% else %}
             <p style="color: #94a3b8;">No hay salas creadas todavía.</p>

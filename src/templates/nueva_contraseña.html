@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+  <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; color: white; font-family: sans-serif;">
+    <h2 style="text-align: center; margin-bottom: 30px;">Nueva contraseña</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for mensaje in messages %}
+          <p style="color: #f87171; text-align: center; margin-bottom: 10px;">{{ mensaje }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="/nueva_contraseña/{{ token }}" method="POST">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NUEVA CONTRASEÑA</label>
+        <input type="password" name="nueva" placeholder="Nueva contraseña" required
+          style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONFIRMAR CONTRASEÑA</label>
+        <input type="password" name="confirmar" placeholder="Repetí la contraseña" required
+          style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+      </div>
+      <button type="submit"
+        style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">
+        GUARDAR CONTRASEÑA
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const nueva = document.querySelector('input[name="nueva"]').value;
+    const confirmar = document.querySelector('input[name="confirmar"]').value;
+    if (nueva !== confirmar) {
+      e.preventDefault();
+      alert("Las contraseñas no coinciden");
+    }
+  });
+</script>
+{% endblock %}
