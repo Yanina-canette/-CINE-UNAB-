@@ -1,5 +1,5 @@
 from werkzeug.security import check_password_hash, generate_password_hash
-from cartelera import Funcion, compra, MetodoPago
+from cartelera import Funcion, Compra, MetodoPago
 from datetime import datetime
 
 
@@ -7,7 +7,7 @@ class Usuario():
     def __init__(self,nombre,email,contraseña):
         self.__nombre = nombre
         self.__email = email
-        self. __contraseña = contraseña
+        self.__contraseña = contraseña
     
     def get_nombre(self):
         return self.__nombre
@@ -74,14 +74,14 @@ class Cliente(Usuario):
         return funciones
 
     def seleccionar_asiento(self,funcion,asiento):
-        return funcion.reservar_asientos(asiento)
+        return funcion.reservar_asiento(asiento)
 
     def elegir_metodo_pago(self,metodo_pago):
         return metodo_pago.procesar_pago()
       
 
     def confirmar_compra(self,funcion,asiento,pago):
-        nueva_compra = compra(
+        nueva_compra = Compra(
             precio= funcion.precio,
             fecha= datetime.now(),
             funcion= funcion,

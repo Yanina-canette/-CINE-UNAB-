@@ -1,30 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Recuperar contraseña</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
-</head>
-<body>
-    <div class="login-container">
-        <h2>Recuperar contraseña</h2>
+{% extends "base.html" %}
 
+{% block contenido %}
+    <div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+    <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; color: white; font-family: sans-serif;">
+        <div class="login-container">
+        <h2 style="text-align: center; margin-bottom: 30px;">Recuperar contraseña</h2>
+        
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for mensaje in messages %}
-                    <p style="color:red; margin-bottom:10px;">{{ mensaje }}</p>
+                    <p style="color: #f87171; text-align: center; margin-bottom: 10px;">{{ mensaje }}</p>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
         <form action="/recuperar" method="POST">
-            <input type="email" name="email" placeholder="Email registrado" required>
-            <input type="password" name="nueva" placeholder="Nueva contraseña" required>
-            <input type="password" name="confirmar" placeholder="Confirmar contraseña" required>
-            <button type="submit">Actualizar contraseña</button>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CORREO</label>
+                <input type="email" name="email" placeholder="Email registrado" required
+                style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NUEVA CONTRASEÑA</label>
+                <input type="password" name="nueva" placeholder="Nueva contraseña" required
+                style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+            </div>
+            <button type="submit"  style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; margin-bottom: 10px;">ACTUALIZAR CONTRASEÑA</button>
         </form>
-
-        <p><a href="/login">Volver al login</a></p>
+            
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="/login" style="color: #94a3b8; text-decoration: none;">Volver al login</a>
+            </p>
+        
+        </div>
+    </div>
     </div>
 
     <script>
@@ -39,5 +48,5 @@
             }
         });
     </script>
-</body>
-</html>
+
+{% endblock %}

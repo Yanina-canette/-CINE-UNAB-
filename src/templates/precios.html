@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 60px 20px; color: white; font-family: sans-serif;">
+  <div style="max-width: 800px; margin: 0 auto;">
+
+    <h1 style="text-align:center; font-size: 2rem; margin-bottom: 10px;">🎟️ Precios de Entradas</h1>
+    <p style="text-align:center; color:#94a3b8; margin-bottom: 40px;">
+      Los estudiantes universitarios verificados acceden a un <strong style="color:#facc15;">50% de descuento</strong>.
+    </p>
+
+    <!-- Tabla de precios -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 50px;">
+
+      <!-- Sala 2D -->
+      <div style="background:#1c2541; border-radius: 12px; padding: 30px; flex: 1; min-width: 280px; border: 1px solid #3b82f6;">
+        <h2 style="color:#3b82f6; margin-bottom: 20px; font-size:1.5rem;">🎬 Sala 2D</h2>
+        <div style="margin-bottom: 15px;">
+          <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 4px;">Entrada general</p>
+          <p style="font-size: 1.8rem; font-weight: bold; color: white;">$13.000</p>
+        </div>
+        <hr style="border-color:#2d3f6b; margin: 15px 0;">
+        <div>
+          <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 4px;">Estudiante universitario verificado</p>
+          <p style="font-size: 1.8rem; font-weight: bold; color: #4ade80;">$6.500</p>
+          <span style="background:#14532d; color:#4ade80; padding: 3px 10px; border-radius: 20px; font-size:0.8rem;">
+            50% OFF
+          </span>
+        </div>
+      </div>
+
+      <!-- Sala 3D -->
+      <div style="background:#1c2541; border-radius: 12px; padding: 30px; flex: 1; min-width: 280px; border: 1px solid #a855f7;">
+        <h2 style="color:#a855f7; margin-bottom: 20px; font-size:1.5rem;">🥽 Sala 3D</h2>
+        <div style="margin-bottom: 15px;">
+          <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 4px;">Entrada general</p>
+          <p style="font-size: 1.8rem; font-weight: bold; color: white;">$15.400</p>
+        </div>
+        <hr style="border-color:#2d3f6b; margin: 15px 0;">
+        <div>
+          <p style="color:#94a3b8; font-size:0.9rem; margin-bottom: 4px;">Estudiante universitario verificado</p>
+          <p style="font-size: 1.8rem; font-weight: bold; color: #4ade80;">$7.700</p>
+          <span style="background:#14532d; color:#4ade80; padding: 3px 10px; border-radius: 20px; font-size:0.8rem;">
+            50% OFF
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Cómo obtener el descuento -->
+    <div style="background:#1c2541; border-radius: 12px; padding: 30px; border: 1px solid #facc15;">
+      <h2 style="color:#facc15; margin-bottom: 20px;">📋 ¿Cómo obtener el descuento estudiantil?</h2>
+      <div style="display:flex; flex-direction:column; gap:15px;">
+
+        <div style="display:flex; gap:15px; align-items:flex-start;">
+          <span style="background:#3b82f6; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">1</span>
+          <div>
+            <p style="font-weight:bold; margin-bottom:4px;">Registrate en la plataforma</p>
+            <p style="color:#94a3b8; font-size:0.9rem;">Creá tu cuenta seleccionando la opción "Soy estudiante universitario".</p>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:15px; align-items:flex-start;">
+          <span style="background:#3b82f6; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">2</span>
+          <div>
+            <p style="font-weight:bold; margin-bottom:4px;">Subí tu foto de estudiante</p>
+            <p style="color:#94a3b8; font-size:0.9rem;">Adjuntá una foto de tu credencial o certificado de alumno regular vigente.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:15px; align-items:flex-start;">
+          <span style="background:#3b82f6; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0;">3</span>
+          <div>
+            <p style="font-weight:bold; margin-bottom:4px;">Esperá la verificación</p>
+            <p style="color:#94a3b8; font-size:0.9rem;">Un administrador revisará tu solicitud. Te avisaremos cuando esté aprobada.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:15px; align-items:flex-start;">
+          <span style="background:#4ade80; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0; color:#000;">✓</span>
+          <div>
+            <p style="font-weight:bold; margin-bottom:4px;">¡Listo! Ya podés comprar con descuento</p>
+            <p style="color:#94a3b8; font-size:0.9rem;">El descuento se aplica automáticamente al momento de la compra.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:40px;">
+      <a href="/peliculas" style="background:#3b82f6; color:white; padding: 12px 30px; border-radius:8px; text-decoration:none; font-size:1rem;">
+        Ver películas en cartelera →
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

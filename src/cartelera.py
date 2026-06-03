@@ -1,11 +1,30 @@
 from datetime import datetime
 
-class pelicula:
-    def __init__(self):
-        pass
-    
+class Pelicula:
+    def __init__(self, data_json):
+        self.id_pelicula = None
+        self.api_id = data_json.get("id")
+        self.titulo = data_json.get("title")
+        self.sinopsis = data_json.get("overview")
+        self.calificacion = data_json.get("vote_average")
+        self.fecha_estreno = data_json.get("release_date")
+        self.idioma = data_json.get("original_language")
+        self.clasificacion = "N/A"
+        self.director = None
+        self.duracion = None
 
-class sala:
+        # Manejo seguro de imágenes (evita URLs con "None" al final)
+        poster = data_json.get("poster_path")
+        backdrop = data_json.get("backdrop_path")
+        self.poster_url = f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+        self.imagen_carru = f"https://image.tmdb.org/t/p/w1280{backdrop}" if backdrop else None
+
+        # Guardamos los IDs , los nombres se resuelven aparte
+        self.genero_ids = data_json.get("genre_ids", [])
+        self.genero = "N/A"  # Se completa después con el diccionario de géneros
+
+
+class Sala:
     def __init__(self, numero_sala,capacidad, tipo_sala):
         self.numero_sala = numero_sala
         self.capacidad = capacidad
@@ -76,17 +95,18 @@ class Funcion:
         print("Sala:", self.sala)
         print("Precio:", self.precio)
 
-class entrada:
+class Entrada:
     def __init__(self,asiento,usuario,funcion,precio_final):
         pass
 
 
-class compra:
-    def __init__(self, precio, fecha, funcion, asientos):
+class Compra:
+    def __init__(self, precio, fecha, funcion, asientos, es_estudiante:bool):
         self.__precio = precio
         self.__fecha = fecha
         self.__funcion = funcion
         self.__asientos = asientos
+        self.__es_estudiante = es_estudiante
         
     def validar_asientos(self):
         asientos_por_fila = 5
@@ -98,7 +118,10 @@ class compra:
         
     def calcular_total(self):
         total = float(self.__precio * self.__asientos)
-        return total
+        if self.__es_estudiante == True:
+            return total/2
+        else:
+            return total
         
     def generar_fecha(self,fecha_compra:str):
         # En los atributos, se debe pasar la fecha en string de la siguiente manera para convertirla: "27-5-2026 (fecha) 15:00:00 (hora)"
@@ -110,9 +133,6 @@ class MetodoPago:
     def __init__(self, monto, titular):
         self.__monto = monto
         self.__titular = titular
-
-    def procesar_pago(self):
-        pass
 
 
 # Pago con tarjeta
@@ -139,11 +159,12 @@ class PagoEfectivo(MetodoPago):
         return f"Pago en efectivo realizado. Vuelto: ${vuelto}"
 
 
-# Pago por transferencia
-class PagoTransferencia(MetodoPago):
-    def __init__(self, monto, titular, banco):
+# Pago por mercado pago
+class PagoMercadoPago(MetodoPago):
+    def __init__(self, monto, titular):
         super().__init__(monto, titular)
-        self.__banco = banco
+        self.__link = "link.mercadopago.com.ar/cineunab"
 
     def procesar_pago(self):
-        return f"Transferencia realizada desde {self.__banco}"
+        return self.__link
+

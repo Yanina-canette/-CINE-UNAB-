@@ -166,7 +166,7 @@ small{
 display: none;
 }
 
-/. cuando el formulario se intente enviar, si el input esta mal,mostramos el msj rojo/
+/* cuando el formulario se intente enviar, si el input esta mal,mostramos el msj rojo*/
 .was-validated input:invalid ~ small{
 display: block;
 color: red;

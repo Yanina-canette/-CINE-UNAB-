@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<div style="background-color: #0b132b; min-height: 100vh; padding: 40px 20px; color: white; font-family: sans-serif;">
+  <div style="max-width: 700px; margin: 0 auto;">
+
+    <a href="/pelicula/{{ funcion.api_id }}" style="color: #3b82f6;">← Volver</a>
+    <h1 style="margin: 20px 0 5px;">{{ funcion.titulo }}</h1>
+    <p style="color: #cbd5e1; margin-bottom: 5px;">📅 {{ funcion.fecha }} — 🕐 {{ funcion.hora }}</p>
+    <p style="color: #cbd5e1; margin-bottom: 20px;">🎭 Sala: {{ funcion.sala }}</p>
+
+    <!-- RELOJ DE RESERVA -->
+    <div id="timer-box" style="display:none; background:#1e3a5f; border: 1px solid #3b82f6; 
+         padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; text-align:center;">
+      ⏱ Tu reserva expira en: 
+      <strong id="countdown" style="font-size: 1.3rem; color: #facc15;">10:00</strong>
+      <p style="font-size:0.8rem; color:#94a3b8; margin: 4px 0 0;">
+        Si no completás el pago a tiempo, los asientos se liberan automáticamente.
+      </p>
+    </div>
+
+    <!-- Pantalla -->
+    <div style="background: #3b82f6; text-align: center; padding: 8px; border-radius: 5px; 
+         margin-bottom: 30px; color: white; font-weight: bold; letter-spacing: 3px;">
+      PANTALLA
+    </div>
+
+    <!-- Mapa de asientos (se llena con JS) -->
+    <div id="mapa-asientos" style="display: flex; flex-wrap: wrap; gap: 10px; 
+         justify-content: center; margin-bottom: 30px;">
+      <p style="color:#94a3b8;">Cargando asientos...</p>
+    </div>
+
+    <!-- Referencia -->
+    <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; font-size: 0.9rem; flex-wrap: wrap;">
+      <span><span style="background:#22c55e; padding: 3px 10px; border-radius: 4px;">  </span> Libre</span>
+      <span><span style="background:#ef4444; padding: 3px 10px; border-radius: 4px;">  </span> Ocupado</span>
+      <span><span style="background:#f59e0b; padding: 3px 10px; border-radius: 4px;">  </span> Tu selección</span>
+      <span><span style="background:#94a3b8; padding: 3px 10px; border-radius: 4px;">  </span> Reservado</span>
+    </div>
+
+    <!-- Resumen -->
+    <div style="background: #1c2541; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+      <p>Asientos seleccionados: <span id="resumen-asientos" style="color: #f59e0b; font-weight: bold;">Ninguno</span></p>
+      <p style="margin-top: 10px;">Total: <span id="resumen-total" style="color: #4ade80; font-weight: bold;">$0</span></p>
+    </div>
+
+    <!-- Botón continuar -->
+    <form action="/pagar" method="POST" id="form-compra">
+      <input type="hidden" name="funcion_id" value="{{ funcion.id }}">
+      <input type="hidden" name="asientos" id="input-asientos" value="">
+      <button type="submit" id="btn-comprar" disabled
+        style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; 
+               border-radius: 5px; font-size: 1rem; cursor: pointer; opacity: 0.5;">
+        Continuar con el pago →
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<style>
+  .asiento {
+    width: 45px; height: 45px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; cursor: pointer; font-size: 0.8rem;
+    transition: transform 0.1s;
+  }
+  .asiento:hover { transform: scale(1.1); }
+  .asiento.libre    { background: #22c55e; color: #000; }
+  .asiento.ocupado  { background: #ef4444; color: #fff; cursor: not-allowed; }
+  .asiento.reservado { background: #94a3b8; color: #fff; cursor: not-allowed; }
+  .asiento.seleccionado { background: #f59e0b; color: #000; }
+</style>
+
+<script>
+  const FUNCION_ID = {{ funcion.id }};
+  const PRECIO = 1500;
+  let asientosSeleccionados = {}; // { asiento_id: true }
+  let timerInterval = null;
+  let expiraEn = null;
+
+  // --- Cargar mapa de asientos desde el servidor ---
+  async function cargarAsientos() {
+    const res = await fetch(`/estado_asientos/${FUNCION_ID}`);
+    const data = await res.json();
+    const mapa = document.getElementById('mapa-asientos');
+    mapa.innerHTML = '';
+
+    data.asientos.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'asiento ' + (asientosSeleccionados[a.id] ? 'seleccionado' : a.estado);
+      div.id = `asiento-${a.id}`;
+      div.dataset.id = a.id;
+      div.textContent = a.fila + a.numero;
+      div.title = `Fila ${a.fila} - Asiento ${a.numero}`;
+
+      if (a.estado === 'libre' || asientosSeleccionados[a.id]) {
+        div.onclick = () => toggleAsiento(a.id);
+      }
+
+      mapa.appendChild(div);
+    });
+  }
+
+  // --- Click en asiento ---
+  async function toggleAsiento(asientoId) {
+    if (asientosSeleccionados[asientoId]) {
+      // Deseleccionar
+      await fetch('/liberar_asiento', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({funcion_id: FUNCION_ID, asiento_id: asientoId})
+      });
+      delete asientosSeleccionados[asientoId];
+
+      // Si no quedan asientos, paramos el timer
+      if (Object.keys(asientosSeleccionados).length === 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('timer-box').style.display = 'none';
+      }
+    } else {
+      // Seleccionar
+      const res = await fetch('/reservar_asiento', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({funcion_id: FUNCION_ID, asiento_id: asientoId})
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        asientosSeleccionados[asientoId] = true;
+
+        // Iniciamos el timer solo con el primer asiento
+        if (!timerInterval) {
+          iniciarTimer(data.expira_en);
+        }
+      } else {
+        alert('Este asiento ya no está disponible, recargando...');
+        cargarAsientos();
+        return;
+      }
+    }
+
+    actualizarResumen();
+    cargarAsientos();
+  }
+
+  // --- Timer visual ---
+  function iniciarTimer(fechaExpira) {
+    expiraEn = new Date(fechaExpira);
+    document.getElementById('timer-box').style.display = 'block';
+
+    timerInterval = setInterval(() => {
+      const resta = Math.max(0, expiraEn - new Date());
+      const min = Math.floor(resta / 60000);
+      const seg = Math.floor((resta % 60000) / 1000);
+      const countdown = document.getElementById('countdown');
+      countdown.textContent = `${min}:${seg.toString().padStart(2, '0')}`;
+
+      // Aviso cuando queda menos de 2 minutos
+      if (resta <= 120000) {
+        countdown.style.color = '#ef4444';
+        document.getElementById('timer-box').style.borderColor = '#ef4444';
+      }
+
+      if (resta === 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        asientosSeleccionados = {};
+        actualizarResumen();
+        cargarAsientos();
+        document.getElementById('timer-box').style.display = 'none';
+        alert('⏰ Se acabó el tiempo. Tus asientos fueron liberados.');
+      }
+    }, 1000);
+  }
+
+  // --- Actualizar resumen y botón ---
+  function actualizarResumen() {
+    const ids = Object.keys(asientosSeleccionados).map(Number);
+    const nombresAsientos = ids.map(id => {
+  const btn = document.getElementById(`asiento-${id}`);
+  return btn ? btn.textContent : id;
+});
+document.getElementById('resumen-asientos').textContent =
+  nombresAsientos.length > 0 ? nombresAsientos.join(', ') : 'Ninguno';
+    document.getElementById('resumen-total').textContent =
+      '$' + (ids.length * PRECIO).toLocaleString('es-AR');
+    document.getElementById('input-asientos').value = ids.join(',');
+
+    const btn = document.getElementById('btn-comprar');
+    btn.disabled = ids.length === 0;
+    btn.style.opacity = ids.length === 0 ? '0.5' : '1';
+  }
+
+  // Cargamos al entrar
+  cargarAsientos();
+
+  // Recargamos el estado cada 15 segundos para ver si otros reservaron
+  setInterval(cargarAsientos, 15000);
+</script>
+{% endblock %}
