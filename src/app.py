@@ -4,7 +4,7 @@ from mysql.connector import pooling
 from flask import session
 import os
 import requests
-from cartelera import Pelicula,Sala,Funcion,Entrada,Compra,Metodo_pago
+from cartelera import pelicula,sala,Funcion,entrada,compra,MetodoPago
 from usuarios import Usuario,Administrador,Cliente
 
 
@@ -22,7 +22,7 @@ pool = pooling.MySQLConnectionPool(
     pool_size=5,
     host="localhost",
     user="root",
-    password="mysql0610",
+    password= "",
     database="cine_database"
     
 )
