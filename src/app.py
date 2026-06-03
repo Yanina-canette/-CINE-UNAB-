@@ -4,7 +4,7 @@ from mysql.connector import pooling
 from flask import session
 import os
 import requests
-from cartelera import Pelicula,Sala,Funcion,Entrada,Compra, MetodoPago
+from cartelera import Pelicula,Sala,Funcion,Entrada,Compra,MetodoPago,PagoEfectivo,PagoMercadoPago,PagoTarjeta
 from usuarios import Usuario,Administrador,Cliente
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
