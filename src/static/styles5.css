@@ -96,3 +96,39 @@ footer {
   border-top: 1px solid rgba(255,255,255,0.1);
   padding-top: 0.6rem;
 }
+
+
+/* ===== RESPONSIVE FOOTER ===== */
+
+@media (max-width: 768px) {
+  .footer-inner {
+      flex-direction: column;
+      gap: 1.5rem;
+  }
+
+  .footer-col:nth-child(3) {
+      margin-left: 0;
+  }
+
+  .footer-brand {
+      justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  footer {
+      padding: 1.2rem 1rem 0.8rem;
+  }
+
+  .footer-inner {
+      gap: 1.2rem;
+  }
+
+  .footer-col h4 {
+      font-size: 0.8rem;
+  }
+
+  .footer-col a {
+      font-size: 0.8rem;
+  }
+}

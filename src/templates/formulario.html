@@ -1,12 +1,8 @@
 {% extends "base.html" %}
 
-{% block estilos %}
-
-{% endblock %}
-
 {% block contenido %}
-<div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
-    <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; color: white; font-family: sans-serif;">
+<div class="form-page" style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+    <div class="form-card" style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 500px; color: white; font-family: sans-serif;">
         
         <h2 style="text-align: center; margin-bottom: 30px; font-size: 1.5rem;">REGISTRO DE USUARIO</h2>
 
@@ -21,22 +17,22 @@
         <form id="form-validation" action="/formulario" method="POST" enctype="multipart/form-data" novalidate>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NOMBRE</label>
-                <input type="text" name="nombre" placeholder="Ingrese Nombre" required
+                <input type="text" name="nombre" placeholder="Ingrese Nombre" required class="login-input"
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">APELLIDO</label>
-                <input type="text" name="apellido" placeholder="Ingrese Apellido" required
+                <input type="text" name="apellido" placeholder="Ingrese Apellido" required class="login-input"
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">TELÉFONO</label>
-                <input type="number" name="telefono" placeholder="Ingrese Telefono" required
+                <input type="number" name="telefono" placeholder="Ingrese Telefono" required class="login-input"
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">¿ES ESTUDIANTE?</label>
-                <select name="es_estudiante" id="es_estudiante" required
+                <select name="es_estudiante" id="es_estudiante" required class="login-input"
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
                     <option value="" disabled selected>Seleccione...</option>
                     <option value="si">Sí</option>
@@ -47,24 +43,36 @@
             <div id="div_imagen" style="margin-bottom: 15px; display:none;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">IMAGEN DE ALUMNO REGULAR</label>
                 <input type="file" name="imagen_estudiante" accept="image/*"
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
                 <small style="color: #94a3b8;">Subí una foto de tu credencial o certificado de alumno regular</small>
             </div>
 
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">EMAIL</label>
-                <input type="email" name="email" placeholder="Ingrese Email" required
+                <input type="email" name="email" placeholder="Ingrese Email" required class="login-input"
                     style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONTRASEÑA</label>
-                <input type="password" name="contraseña" placeholder="Ingrese Contraseña" required
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <div style="position: relative;">
+                    <input type="password" name="contraseña" id="contraseña" placeholder="Ingrese Contraseña" required class="login-input"
+                        style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+                    <span onclick="togglePassword('contraseña', 'ojito1')"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        <i id="ojito1" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+                    </span>
+                </div>
             </div>
             <div style="margin-bottom: 25px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONFIRMAR CONTRASEÑA</label>
-                <input type="password" name="confirmar" placeholder="Confirme Contraseña" required
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <div style="position: relative;">
+                    <input type="password" name="confirmar" id="confirmar" placeholder="Confirme Contraseña" required class="login-input"
+                        style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+                    <span onclick="togglePassword('confirmar', 'ojito2')"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        <i id="ojito2" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+                    </span>
+                </div>
             </div>
             <button type="submit"
                 style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">
@@ -75,6 +83,18 @@
 </div>
 
 <script>
+    function togglePassword(inputId, ocitoId) {
+        const input = document.getElementById(inputId);
+        const ojito = document.getElementById(ocitoId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            ojito.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            ojito.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
     document.getElementById('es_estudiante').addEventListener('change', function() {
         document.getElementById('div_imagen').style.display = 
             this.value === 'si' ? 'block' : 'none';

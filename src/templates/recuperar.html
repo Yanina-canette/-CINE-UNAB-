@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block contenido %}
-<div style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
-  <div style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; color: white; font-family: sans-serif;">
+<div class= "form-page" style="background-color: #0b132b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+  <div class= "form-card" style="background: #1c2541; padding: 40px; border-radius: 10px; width: 100%; max-width: 400px; color: white; font-family: sans-serif;">
     <h2 style="text-align: center; margin-bottom: 30px;">Recuperar contraseña</h2>
 
     {% with messages = get_flashed_messages() %}
@@ -15,7 +15,7 @@
     <form action="/recuperar" method="POST">
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CORREO</label>
-        <input type="email" name="email" placeholder="Email registrado" required
+        <input type="email" name="email" placeholder="Email registrado" required class="login-input"
           style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
       </div>
       <button type="submit"
