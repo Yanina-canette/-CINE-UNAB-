@@ -15,13 +15,25 @@
     <form action="/nueva_contraseña/{{ token }}" method="POST">
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">NUEVA CONTRASEÑA</label>
-        <input type="password" name="nueva" placeholder="Nueva contraseña" required
-          style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+        <div style="position: relative;">
+          <input type="password" name="nueva" id="nueva" placeholder="Nueva contraseña" required
+            style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+          <span onclick="togglePassword('nueva', 'ojito1')"
+            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            <i id="ojito1" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+          </span>
+        </div>
       </div>
-      <div style="margin-bottom: 15px;">
+      <div style="margin-bottom: 25px;">
         <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONFIRMAR CONTRASEÑA</label>
-        <input type="password" name="confirmar" placeholder="Repetí la contraseña" required
-          style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+        <div style="position: relative;">
+          <input type="password" name="confirmar" id="confirmar" placeholder="Repetí la contraseña" required
+            style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+          <span onclick="togglePassword('confirmar', 'ojito2')"
+            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            <i id="ojito2" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+          </span>
+        </div>
       </div>
       <button type="submit"
         style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">
@@ -32,6 +44,18 @@
 </div>
 
 <script>
+  function togglePassword(inputId, ojitoId) {
+    const input = document.getElementById(inputId);
+    const ojito = document.getElementById(ojitoId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      ojito.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+      input.type = 'password';
+      ojito.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+  }
+
   document.querySelector('form').addEventListener('submit', function(e) {
     const nueva = document.querySelector('input[name="nueva"]').value;
     const confirmar = document.querySelector('input[name="confirmar"]').value;

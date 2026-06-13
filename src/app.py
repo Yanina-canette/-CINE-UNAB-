@@ -245,6 +245,17 @@ def nueva_contraseña(token):
             cursor.close()
             conexion.close()
 
+        # Enviamos email de confirmación
+        try:
+            msg = Message(
+                subject="✅ Contraseña actualizada — CINE UNAB",
+                recipients=[email]
+            )
+            msg.html = render_template('email_cambio_contraseña.html')
+            mail.send(msg)
+        except Exception as e:
+            print(f"Error al enviar mail: {e}")
+
         flash("✅ Contraseña actualizada correctamente")
         return redirect(url_for('login'))
 

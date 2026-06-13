@@ -58,13 +58,25 @@
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONTRASEÑA</label>
-                <input type="password" name="contraseña" placeholder="Ingrese Contraseña" required
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <div style="position: relative;">
+                    <input type="password" name="contraseña" id="contraseña" placeholder="Ingrese Contraseña" required
+                        style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+                    <span onclick="togglePassword('contraseña', 'ojito1')"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        <i id="ojito1" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+                    </span>
+                </div>
             </div>
             <div style="margin-bottom: 25px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">CONFIRMAR CONTRASEÑA</label>
-                <input type="password" name="confirmar" placeholder="Confirme Contraseña" required
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <div style="position: relative;">
+                    <input type="password" name="confirmar" id="confirmar" placeholder="Confirme Contraseña" required
+                        style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+                    <span onclick="togglePassword('confirmar', 'ojito2')"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        <i id="ojito2" class="fa-regular fa-eye" style="color: #94a3b8; font-size: 18px;"></i>
+                    </span>
+                </div>
             </div>
             <button type="submit"
                 style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">
@@ -75,6 +87,18 @@
 </div>
 
 <script>
+    function togglePassword(inputId, ocitoId) {
+        const input = document.getElementById(inputId);
+        const ojito = document.getElementById(ocitoId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            ojito.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            ojito.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
     document.getElementById('es_estudiante').addEventListener('change', function() {
         document.getElementById('div_imagen').style.display = 
             this.value === 'si' ? 'block' : 'none';

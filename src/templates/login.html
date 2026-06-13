@@ -22,8 +22,14 @@
             </div>
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #cbd5e1;">Contraseña</label>
-                <input type="password" name="contraseña" required
-                    style="width: 100%; padding: 10px; border-radius: 5px; border: none; background: #0b132b; color: white;">
+                <div style="position: relative;">
+                    <input type="password" name="contraseña" id="contraseña" required
+                        style="width: 100%; padding: 10px; padding-right: 40px; border-radius: 5px; border: none; background: #0b132b; color: white; box-sizing: border-box;">
+                    <span onclick="togglePassword()"
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none;">
+                        <i id="ojito" class="fa-regular fa-eye" style="color: #94a3b8;"></i>
+                    </span>
+                </div>
             </div>
             <a href="/recuperar" class="btn-animado"
                 style="display: block; text-align: center; color: #94a3b8; margin-bottom: 20px; font-size: 0.9rem;">Olvidé mi contraseña</a>
@@ -44,4 +50,17 @@
         transition: filter 0.2s;
     }
 </style>
+<script>
+function togglePassword() {
+    const input = document.getElementById('contraseña');
+    const ojito = document.getElementById('ojito');
+    if (input.type === 'password') {
+        input.type = 'text';
+        ojito.classList.replace('ti-eye', 'ti-eye-off');
+    } else {
+        input.type = 'password';
+        ojito.classList.replace('fa-eye', 'fa-eye-slash');
+    }
+}
+</script>
 {% endblock %}
