@@ -169,3 +169,71 @@ nav a.active {
     text-decoration: underline;
 }
 
+/* ===== RESPONSIVE HEADER ===== */
+
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .logo img {
+        height: 120px;
+    }
+
+    nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+        gap: 16px;
+        padding: 6px 0;
+        border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    nav a {
+        font-size: 1rem;
+    }
+
+    /* usuario y logout */
+    header > a[href*="perfil"],
+    header > a[href*="admin"],
+    header > a[href*="logout"],
+    header > a[href*="login"] {
+        font-size: 0.85rem;
+    }
+
+    .btn-logout {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-login {
+        width: 42px;
+        height: 42px;
+    }
+
+    .btn-login i {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    nav {
+        gap: 12px;
+    }
+
+    nav a {
+        font-size: 0.9rem;
+    }
+}
+
+/* ===== FIX CLASES DESKTOP/TABLET/CELULAR ===== */
+/* Estas clases estaban rotas — las dejamos neutras para no ocultar nada */
+.desktop, .tablet, .celular {
+    display: block;
+}
+
+

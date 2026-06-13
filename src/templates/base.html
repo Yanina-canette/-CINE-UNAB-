@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles5.css') }}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
     {% block estilos %}{% endblock %}
 </head>
 
@@ -24,20 +25,21 @@
         <a href="{{url_for('peliculas')}}">Películas</a>
         <a href="/precios">Precio entradas</a>
     </nav>
-    {% if usuario %}
-    <a href="{{ url_for('perfil') }}" style="color:white; font-weight:bold;">Hola, {{ usuario }}</a>
-    {% if es_admin %}
-        <a href="{{ url_for('admin') }}" style="color:#3b82f6; margin-right:10px;">⚙ Admin</a>
-    {% endif %}
-    <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
-{% else %}
-    <a href="{{ url_for('login') }}" style="text-decoration: none;">
-        <button class="btn-login">
-            <i class="fa-regular fa-user"></i>
-        </button>
-    </a>
-{% endif %}
-      
+    
+    <div class="usuario-header">
+        {% if usuario %}
+            <a href="{{ url_for('perfil') }}">Hola, {{ usuario }}</a>
+            {% if es_admin %}
+                <a href="{{ url_for('admin') }}" style="color:#3b82f6;">⚙ Admin</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar sesión</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" style="text-decoration: none;">
+                <button class="btn-login">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </a>
+        {% endif %}
     </div>
 
 
