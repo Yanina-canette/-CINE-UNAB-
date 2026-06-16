@@ -20,8 +20,21 @@
       <h1 style="font-size: 2rem; margin-bottom: 10px;">{{ pelicula.titulo }}</h1>
       <p style="color: #f0c040; margin-bottom: 10px;">⭐ {{ pelicula.calificacion }}/10</p>
       {% if pelicula.duracion %}
-        <p style="color: #cbd5e1; margin-bottom: 10px;">⏱ {{ pelicula.duracion }} minutos</p>
-      {% endif %}
+  <p style="color: #cbd5e1; margin-bottom: 10px;">⏱ {{ pelicula.duracion }} minutos</p>
+{% endif %}
+{% if pelicula.clasificacion %}
+  <p style="color: #cbd5e1; margin-bottom: 10px;">🔞 Clasificación: {{ pelicula.clasificacion }}</p>
+{% endif %}
+ {% if pelicula.trailer_key %}
+  <div style="margin-bottom: 20px;">
+    <h3 style="color: #cbd5e1; margin-bottom: 10px;">🎬 Trailer</h3>
+    <iframe width="100%" height="250" 
+            src="https://www.youtube.com/embed/{{ pelicula.trailer_key }}"
+            frameborder="0" allowfullscreen
+            style="border-radius: 10px;">
+    </iframe>
+  </div>
+{% endif %}
       <p style="color: #cbd5e1; line-height: 1.6; margin-bottom: 30px;">{{ pelicula.sinopsis }}</p>
 
       <!-- Funciones -->

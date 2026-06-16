@@ -295,6 +295,42 @@ def detalle_pelicula(api_id):
         datos = respuesta.json()
         pelicula = Pelicula(datos)
         pelicula.duracion = datos.get("runtime")
+
+        # Traemos la clasificación por edad
+        url_clasificacion = f"https://api.themoviedb.org/3/movie/{api_id}/release_dates?api_key={API_KEY}"
+        resp_clas = requests.get(url_clasificacion)
+        datos_clas = resp_clas.json()
+        clasificacion = "No disponible"
+        for resultado in datos_clas.get("results", []):
+            if resultado["iso_3166_1"] == "AR":
+                for release in resultado.get("release_dates", []):
+                    if release.get("certification"):
+                        clasificacion = release["certification"]
+                        break
+        pelicula.clasificacion = clasificacion
+
+        # Traemos el trailer
+        url_videos = f"https://api.themoviedb.org/3/movie/{api_id}/videos?api_key={API_KEY}&language=es-ES"
+        resp_videos = requests.get(url_videos)
+        datos_videos = resp_videos.json()
+        trailer_key = None
+        for video in datos_videos.get("results", []):
+            if video["type"] == "Trailer" and video["site"] == "YouTube":
+                trailer_key = video["key"]
+                break
+
+        if not trailer_key:
+            url_videos_en = f"https://api.themoviedb.org/3/movie/{api_id}/videos?api_key={API_KEY}&language=en-US"
+            resp_videos_en = requests.get(url_videos_en)
+            datos_videos_en = resp_videos_en.json()
+            for video in datos_videos_en.get("results", []):
+                if video["type"] == "Trailer" and video["site"] == "YouTube":
+                    trailer_key = video["key"]
+                    break
+
+        pelicula.trailer_key = trailer_key
+        print(f"Trailer key: {trailer_key}")
+
     except Exception as e:
         print(f"Error al traer la película: {e}")
         return redirect(url_for('peliculas'))
